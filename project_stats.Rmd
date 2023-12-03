@@ -1,0 +1,126 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+---
+title: "Study of Applicants Applying for Masters and Phd programs at U of R"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+subtitle: 
+fontsize: 9 pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, eval=T,tidy=TRUE, tidy.opts=list(width.cutoff=60))
+```
+Veronica Mata Ramirez
+
+```   {r}
+library(tidyverse)  
+library(readr)      
+library(ggplot2)    
+library(dplyr)
+
+data <- read.csv("ProjectforFall2023Dataset20220816204620.csv")
+
+# Summary of the dataset
+#summary(data)
+str(data)
+
+# Number of samples
+cat("Number of total samples:", nrow(data), "\n")
+
+masters <- data %>% filter(Degree == "Master's")
+phd <- data %>% filter(Degree == "PhD")
+cat("Number of Master's records:", nrow(masters), "\n")
+cat("Number of PhD records:", nrow(phd), "\n")
+
+
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+# Function to create braplot
+create_bar_plot <- function(data, column_name, top_n = 15, fill_column = "Entry.Term") {
+  # Check if the column names exist in the data frame
+  if (!column_name %in% names(data)) {
+    stop("The specified column does not exist in the data frame.")
+  }
+  if (!fill_column %in% names(data)) {
+    stop("The specified fill column does not exist in the data frame.")
+  }
+  
+  prepared_data <- data %>%
+    filter(!is.na(!!sym(column_name)) & !!sym(column_name) != "") %>%
+    group_by(!!sym(column_name), !!sym(fill_column)) %>%
+    summarise(Count = n(), .groups = "drop") %>%
+    arrange(desc(Count)) %>%
+    top_n(top_n, wt = Count) # Select top N based on Count
+
+  ggplot(prepared_data, aes(x = reorder(!!sym(column_name), Count), y = Count, fill = !!sym(fill_column))) +
+    geom_bar(stat = "identity", position = position_dodge(), width = 0.9) +
+    theme_minimal() +
+    labs(title = paste("Top", top_n, "Categories in", column_name, "by", fill_column), 
+         x = column_name, 
+         y = "Count") +
+    coord_flip() +
+    theme(axis.text.y = element_text(size = 10, angle = 45))
+}
+
+
+create_bar_plot(data, "Birth.Country", 30,  "Degree")
+create_bar_plot(data, "Sex", 4,  "Degree")
+create_bar_plot(data, "Program..ASE.", 50,  "Entry.Term")
+create_bar_plot(data, "Institution.1.Name", 50,  "Entry.Term")
+
+
+# Function to see distributions
+create_filtered_histogram <- function(data, plot_column, filter_column, filter_value, binwidth = 0.5, fill_color = "pink") {
+  # Filter the data
+  filtered_data <- data %>%
+    filter(!!sym(filter_column) == filter_value)
+  
+  # Create the histogram
+  ggplot(filtered_data, aes(x = !!sym(plot_column))) +
+    geom_histogram(binwidth = binwidth, fill = fill_color, color = "black") +
+    theme_minimal() +
+    labs(title = paste("Distribution of", plot_column, "for", filter_column, "=", filter_value), 
+         x = plot_column, 
+         y = "Frequency") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+}
+
+
+# To help respond 2nd sub question of th primary question
+create_filtered_histogram(data, "Age.at.App.Submission", "Degree", "Master's", 0.5, "pink")
+create_filtered_histogram(data, "Age.at.App.Submission", "Degree", "PhD", 0.5, "blue")
+
+# To help respond 3rd sub question of th primary question
+create_filtered_histogram(data, "Age.at.App.Submission", "Have.you.ever.failed.a.course.", 0, 0.5, "green")
+create_filtered_histogram(data, "Age.at.App.Submission", "Have.you.ever.failed.a.course.", 1, 0.5, "yellow")
+
+
+ggplot(data, aes(x = Degree, y = Age.at.App.Submission)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Age Distribution by Degree", 
+       x = "Degree", 
+       y = "Age at Application Submission") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+
+ggplot(data, aes(x = Citizenship, y = Age.at.App.Submission)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Age Distribution by Citizenship", 
+       x = "Citizenship", 
+       y = "Age at Application Submission") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
