@@ -1,0 +1,339 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+library(DescTools)
+library(dplyr)
+data <- read.csv("C:/Users/Sharon/Downloads/ProjectforFall2023Dataset20220816204620.csv")
+
+sapply(data,class)
+
+#Print the names of columns in the dataset
+column_names <- colnames(data)
+print(column_names)
+
+# Missing values 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#Removing some columns 
+#Column to Remove
+column_to_remove <- c("Ref","Citizenship2","Type","How.Applicant.Heard...Other","Institution.3.Degree","Institution.3.Major","Institution.3.Location","Institution.3.Level.of.Study","Institution.3.Name","Institution.2.Degree","Institution.2.Location","Institution.2.Major","Institution.2.Level.of.Study","Institution.2.Name"," Other.Schools.Applying.To","Job.3.Title","Other.Schools.Applying.To","Job.2.Title","Job.1.Title ","Job.1.Title","Institution.1.Major","Institution.1.Level.of.Study","Native.Language","Spouse.Studying.Applying","Any.Relatives.Listed.")
+data <- data[, !colnames(data) %in% column_to_remove]
+column_names <- colnames(data)
+print(column_names)
+
+head(data)
+```
+```{r}
+#Replacing the missing values in the age column (Mean)
+mean_age <- mean(data$Age.at.App.Submission , na.rm = TRUE)
+rounded_mean_age <- round(mean_age)
+cat("The rounded mean age is:", rounded_mean_age)
+
+# Replacing missing age values with the rounded value 
+data$Age.at.App.Submission <- ifelse(is.na(data$Age.at.App.Submission), rounded_mean_age, data$Age.at.App.Submission)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x)
+  mode_value <- as.character(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the "Sex" column
+mode_sex <- calculate_mode(data$Sex)
+
+# Print the result
+cat("Mode of the 'Sex' column:", mode_sex)
+
+# Replace empty places with the mode value
+data$Sex[data$Sex == ""] <- mode_sex
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+```
+
+```{r}
+#Replacing missing values in Have you ever failed a course column
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x, useNA = "ifany")
+  mode_value <- as.numeric(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the column
+mode_value <- calculate_mode(data$Have.you.ever.failed.a.course.)
+
+# Replace missing values with the mode
+data$Have.you.ever.failed.a.course.[is.na(data$Have.you.ever.failed.a.course.)] <- mode_value
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+```
+
+```{r}
+#Replacing missing values in Ever.Placed.on.Academic.Probation 
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x, useNA = "ifany")
+  mode_value <- as.numeric(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the column
+mode_value <- calculate_mode(data$Ever.Placed.on.Academic.Probation )
+
+# Replace missing values with the mode
+data$Ever.Placed.on.Academic.Probation [is.na(data$Ever.Placed.on.Academic.Probation )] <- mode_value
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+frequency_table <- table(data$How.Applicant.Heard.About.UR)
+
+# Find the entry with the maximum frequency
+most_frequent_entry <- names(frequency_table)[which.max(frequency_table)]
+
+# Print the result
+cat("The most frequent entry is:", most_frequent_entry)
+cat("With a frequency of:", frequency_table[most_frequent_entry])
+```
+
+```{r}
+# Use the table function to get the frequency of each unique entry
+frequency_table <- table(data$How.Applicant.Heard.About.UR)
+
+# Create a data frame to display the results
+result_df <- data.frame(
+  Entry = names(frequency_table),
+  Frequency = as.vector(frequency_table)
+)
+
+# Print the result data frame
+print(result_df)
+
+#Replace missing values (including empty strings) with "unknown sources"
+data$How.Applicant.Heard.About.UR <- ifelse(data$How.Applicant.Heard.About.UR == "" | is.na(data$How.Applicant.Heard.About.UR), "unknown sources", data$How.Applicant.Heard.About.UR)
+
+#Check the count of missing values by column
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#Replacing the Time Status missing values
+unique(data$Time.Status)
+missing_values <- c("", "NA")
+data$Time.Status[data$Time.Status %in% missing_values] <- mode_value
+
+#check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#Replacing missing values in Degree
+data$Degree[is.na(data$Degree) | data$Degree == ""] <- names(sort(table(data$Degree), decreasing = TRUE)[1])
+
+#Check missing values by column
+print("Count of missing values by column:")
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+```
+
+```{r}
+#Replacing missing values in Institution 1 name 
+data$Institution.1.Name  <- ifelse(data$Institution.1.Name  == "" | is.na(data$Institution.1.Name ), "unknown sources", data$Institution.1.Name )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+# Renaming 'citizenship' to 'Citizenship_status'
+data <- data %>%
+  rename(Citizenship_status =  Citizenship...Status )
+
+# Renaming 'Citizenship1' to 'citizenship'
+data <- data %>%
+  rename(citizenship = Citizenship1.citizenship)
+
+# Print the updated column names
+colnames(data)
+
+
+```
+```{r}
+# Replace 'birth_country' missing values 
+data$Birth.Country[is.na(data$Birth.Country)] <- data$citizenship[is.na(data$Birth.Country)]
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#Replace 'Sub.Category' missing values 
+data$Sub.Category  <- ifelse(data$Sub.Category  == "" | is.na(data$Sub.Category ), "Not Specified", data$Sub.Category )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+```
+
+```{r}
+#Handling missing values in Recommender feature 
+library(dplyr)
+
+data <- data %>%
+  mutate(Num_Two_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "") +
+                        (Recommender.1.Relationship != "" & Recommender.3.Relationship != "") +
+                        (Recommender.2.Relationship != "" & Recommender.3.Relationship != ""),
+         Num_Three_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "" & Recommender.3.Relationship != ""))
+
+# Print the updated data frame
+print(data)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#dropping columns 
+column_to_remove <- c("Recommender.1.Relationship","Recommender.2.Relationship","Recommender.3.Relationship")
+data <- data[, !colnames(data) %in% column_to_remove]
+column_names <- colnames(data)
+print(column_names)
+
+head(data)
+```
+```{r}
+# Combine values and handle missing values 
+# this column is a combination of birth and citizenship both columns
+# two diffeent countries side by side pedict that birth country and citizenship is different for that person
+data$combined <- ifelse(is.na(data$Birth.Country), data$citizenship,
+                      ifelse(is.na(data$citizenship), data$Birth.Country,
+                             ifelse(data$Birth.Country == data$citizenship, data$Birth.Country,
+                                    paste(data$Birth.Country, data$citizenship, sep = "/"))))
+
+# Print the result
+print(data)
+
+# Specify the column names to remove (can omit if required)
+columns_to_remove <- c("Birth.Country", "citizenship")
+
+# Remove the specified columns
+data <- data[, !(names(data) %in% columns_to_remove)]
+
+# Print the final column names
+cat("\nFinal Column Names:\n")
+print(names(data))
+
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+```
+```{r}
+#Handling missing values in citizenship_status
+unique_values <- unique(data$Citizenship_status )
+print(unique_values)
+frequency_table <- table(data$Citizenship_status )
+print(frequency_table)
+data$Citizenship_status   <- ifelse(data$Citizenship_status   == "" | is.na(data$Citizenship_status  ), "FN", data$Citizenship_status  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+# Handling missing values in combined
+data$combined   <- ifelse(data$combined   == "" | is.na(data$combined  ), "Unknown", data$combined  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+
+# Handling missing values in Institution.1.Location 
+data$Institution.1.Location   <- ifelse(data$Institution.1.Location   == "" | is.na(data$Institution.1.Location  ), "Not Mentioned", data$Institution.1.Location  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+# Handling missing values in Institution.1.Degree
+data$Institution.1.Degree  <- ifelse(data$Institution.1.Degree  == "" | is.na(data$Institution.1.Degree  ), "Not Specified", data$Institution.1.Degree)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+
+#Handling missing values in Num_Three_Recs  and Num_Two_Recs
+data <- data[complete.cases(data$Num_Two_Recs), ]
+data <- data[complete.cases(data$Num_Three_Recs), ]
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+# Handling missing values in Decision.1
+data <- data[complete.cases(data$Decision.1) & data$Decision.1 != "", ]
+
+# Check the count of missing values by column
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+
+```
+
+
+
+
+
