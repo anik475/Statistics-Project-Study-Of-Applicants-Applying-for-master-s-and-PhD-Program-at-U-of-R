@@ -178,11 +178,11 @@ print(sorted_counts)
 
 # Renaming 'citizenship' to 'Citizenship_status'
 data <- data %>%
-  rename(Citizenship_status =  Citizenship...Status )
+  rename(Citizenship_status =  Citizenship )
 
 # Renaming 'Citizenship1' to 'citizenship'
 data <- data %>%
-  rename(citizenship = Citizenship1.citizenship)
+  rename(citizenship = Citizenship1)
 
 # Print the updated column names
 colnames(data)
@@ -191,7 +191,7 @@ colnames(data)
 ```
 ```{r}
 # Replace 'birth_country' missing values 
-data$Birth.Country[is.na(data$Birth.Country)] <- data$citizenship[is.na(data$Birth.Country)]
+data$Birth.Country[is.na(data$Birth.Country)] <- data$Birth.Country[is.na(data$Birth.Country)]
 
 # check code 
 print("Count of missing values by column") 
