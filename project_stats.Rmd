@@ -124,3 +124,426 @@ ggplot(data, aes(x = Citizenship, y = Age.at.App.Submission)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+
+
+
+
+
+
+
+
+
+```{r}
+library(DescTools)
+library(dplyr)
+data <- read.csv("D:\\StatsProject\\StatisticsProject\\ProjectforFall2023Dataset20220816204620.csv")
+
+sapply(data,class)
+
+#Print the names of columns in the dataset
+column_names <- colnames(data)
+print(column_names)
+
+# Missing values 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+print(sorted_counts)
+
+#Removing some columns 
+#Column to Remove
+column_to_remove <- c("Ref","Citizenship2","Type","How.Applicant.Heard...Other","Institution.3.Degree","Institution.3.Major","Institution.3.Location","Institution.3.Level.of.Study","Institution.3.Name","Institution.2.Degree","Institution.2.Location","Institution.2.Major","Institution.2.Level.of.Study","Institution.2.Name"," Other.Schools.Applying.To","Job.3.Title","Other.Schools.Applying.To","Job.2.Title","Job.1.Title ","Job.1.Title","Institution.1.Major","Institution.1.Level.of.Study","Native.Language","Spouse.Studying.Applying","Any.Relatives.Listed.")
+data <- data[, !colnames(data) %in% column_to_remove]
+column_names <- colnames(data)
+print(column_names)
+
+
+```
+```{r}
+#Replacing the missing values in the age column (Mean)
+mean_age <- mean(data$Age.at.App.Submission , na.rm = TRUE)
+rounded_mean_age <- round(mean_age)
+cat("The rounded mean age is:", rounded_mean_age)
+
+# Replacing missing age values with the rounded value 
+data$Age.at.App.Submission <- ifelse(is.na(data$Age.at.App.Submission), rounded_mean_age, data$Age.at.App.Submission)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x)
+  mode_value <- as.character(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the "Sex" column
+mode_sex <- calculate_mode(data$Sex)
+
+# Print the result
+cat("Mode of the 'Sex' column:", mode_sex)
+
+# Replace empty places with the mode value
+data$Sex[data$Sex == ""] <- mode_sex
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+
+```{r}
+#Replacing missing values in Have you ever failed a course column
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x, useNA = "ifany")
+  mode_value <- as.numeric(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the column
+mode_value <- calculate_mode(data$Have.you.ever.failed.a.course.)
+
+# Replace missing values with the mode
+data$Have.you.ever.failed.a.course.[is.na(data$Have.you.ever.failed.a.course.)] <- mode_value
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+
+```{r}
+#Replacing missing values in Ever.Placed.on.Academic.Probation 
+# Function to find mode
+calculate_mode <- function(x) {
+  tbl <- table(x, useNA = "ifany")
+  mode_value <- as.numeric(names(tbl[tbl == max(tbl)]))
+  return(mode_value)
+}
+
+# Find mode of the column
+mode_value <- calculate_mode(data$Ever.Placed.on.Academic.Probation )
+
+# Replace missing values with the mode
+data$Ever.Placed.on.Academic.Probation [is.na(data$Ever.Placed.on.Academic.Probation )] <- mode_value
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+
+frequency_table <- table(data$How.Applicant.Heard.About.UR)
+
+# Find the entry with the maximum frequency
+most_frequent_entry <- names(frequency_table)[which.max(frequency_table)]
+
+# Print the result
+cat("The most frequent entry is:", most_frequent_entry)
+cat("With a frequency of:", frequency_table[most_frequent_entry])
+```
+
+```{r}
+# Use the table function to get the frequency of each unique entry
+frequency_table <- table(data$How.Applicant.Heard.About.UR)
+
+# Create a data frame to display the results
+result_df <- data.frame(
+  Entry = names(frequency_table),
+  Frequency = as.vector(frequency_table)
+)
+
+# Print the result data frame
+print(result_df)
+
+#Replace missing values (including empty strings) with "unknown sources"
+data$How.Applicant.Heard.About.UR <- ifelse(data$How.Applicant.Heard.About.UR == "" | is.na(data$How.Applicant.Heard.About.UR), "unknown sources", data$How.Applicant.Heard.About.UR)
+
+#Check the count of missing values by column
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+#Replacing the Time Status missing values
+unique(data$Time.Status)
+missing_values <- c("", "NA")
+data$Time.Status[data$Time.Status %in% missing_values] <- mode_value
+
+#check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+#Replacing missing values in Degree
+data$Degree[is.na(data$Degree) | data$Degree == ""] <- names(sort(table(data$Degree), decreasing = TRUE)[1])
+
+#Check missing values by column
+print("Count of missing values by column:")
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+
+```{r}
+#Replacing missing values in Institution 1 name 
+data$Institution.1.Name  <- ifelse(data$Institution.1.Name  == "" | is.na(data$Institution.1.Name ), "unknown sources", data$Institution.1.Name )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+# Renaming 'citizenship' to 'Citizenship_status'
+data <- data %>%
+  rename(Citizenship_status =  Citizenship )
+
+# Renaming 'Citizenship1' to 'citizenship'
+data <- data %>%
+  rename(citizenship = Citizenship1)
+
+# Print the updated column names
+colnames(data)
+
+
+```
+```{r}
+# Replace 'birth_country' missing values 
+data$Birth.Country[is.na(data$Birth.Country)] <- data$Birth.Country[is.na(data$Birth.Country)]
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+#Replace 'Sub.Category' missing values 
+data$Sub.Category  <- ifelse(data$Sub.Category  == "" | is.na(data$Sub.Category ), "Not Specified", data$Sub.Category )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+
+```{r}
+#Handling missing values in Recommender feature 
+library(dplyr)
+
+data <- data %>%
+  mutate(Num_Two_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "") +
+                        (Recommender.1.Relationship != "" & Recommender.3.Relationship != "") +
+                        (Recommender.2.Relationship != "" & Recommender.3.Relationship != ""),
+         Num_Three_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "" & Recommender.3.Relationship != ""))
+
+# Print the updated data frame
+print(data)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+#dropping columns 
+column_to_remove <- c("Recommender.1.Relationship","Recommender.2.Relationship","Recommender.3.Relationship")
+data <- data[, !colnames(data) %in% column_to_remove]
+column_names <- colnames(data)
+print(column_names)
+
+
+```
+```{r}
+# Combine values and handle missing values 
+# this column is a combination of birth and citizenship both columns
+# two diffeent countries side by side pedict that birth country and citizenship is different for that person
+data$combined <- ifelse(is.na(data$Birth.Country), data$citizenship,
+                      ifelse(is.na(data$citizenship), data$Birth.Country,
+                             ifelse(data$Birth.Country == data$citizenship, data$Birth.Country,
+                                    paste(data$Birth.Country, data$citizenship, sep = "/"))))
+
+# Print the result
+print(data)
+
+# Specify the column names to remove (can omit if required)
+columns_to_remove <- c("Birth.Country", "citizenship")
+
+# Remove the specified columns
+data <- data[, !(names(data) %in% columns_to_remove)]
+
+# Print the final column names
+cat("\nFinal Column Names:\n")
+print(names(data))
+
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+```{r}
+#Handling missing values in citizenship_status
+unique_values <- unique(data$Citizenship_status )
+print(unique_values)
+frequency_table <- table(data$Citizenship_status )
+print(frequency_table)
+data$Citizenship_status   <- ifelse(data$Citizenship_status   == "" | is.na(data$Citizenship_status  ), "FN", data$Citizenship_status  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+# Handling missing values in combined
+data$combined   <- ifelse(data$combined   == "" | is.na(data$combined  ), "Unknown", data$combined  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+# Handling missing values in Institution.1.Location 
+data$Institution.1.Location   <- ifelse(data$Institution.1.Location   == "" | is.na(data$Institution.1.Location  ), "Not Mentioned", data$Institution.1.Location  )
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+# Handling missing values in Institution.1.Degree
+data$Institution.1.Degree  <- ifelse(data$Institution.1.Degree  == "" | is.na(data$Institution.1.Degree  ), "Not Specified", data$Institution.1.Degree)
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+#Handling missing values in Num_Three_Recs  and Num_Two_Recs
+data <- data[complete.cases(data$Num_Two_Recs), ]
+data <- data[complete.cases(data$Num_Three_Recs), ]
+
+# check code 
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+
+# Handling missing values in Decision.1
+data <- data[complete.cases(data$Decision.1) & data$Decision.1 != "", ]
+
+# Check the count of missing values by column
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(data, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+```
+
+```{r}
+AgeVariance <- data.frame(data$Degree,data$Age.at.App.Submission)
+AgeVariance
+
+
+# Summary statistics
+summary(AgeVariance)
+
+# Boxplot to visualize age variance by degree type
+boxplot(data$Age.at.App.Submission ~ data$Degree , data = data, col = c("lightblue", "lightgreen","Violet"), main = "Age Variance by Degree Type", xlab = "Degree Type", ylab = "Age")
+
+# t-test to compare age variance between Master's and PhD groups
+anova_result <- aov(data$Age ~ data$Degree, data = AgeVariance)
+print(summary(anova_result))
+```
+```{r}
+scatter_plot <- ggplot(AgeVariance, aes(x = data$Age.at.App.Submission, y = data$Degree, color = data$Degree)) +
+  geom_point() +
+  labs(title = "Scatter Plot of Age at Application Submission by Degree",
+       x = "Age at Application Submission",
+       y = "Degree") +
+  theme_minimal()
+
+scatter_plot
+```
+
+```{r}
+# Assuming "data" is your data frame
+cross_tab <- table(data$Sex, data$Degree)
+chi_squared_result <- chisq.test(cross_tab)
+
+# Display the cross-tabulation
+print(cross_tab)
+
+# Display the chi-squared test result
+print(chi_squared_result)
+
+```
+```{r}
+# Assuming "data" is your data frame
+correlation_age_recommendation <- cor(data[, c("Age.at.App.Submission", "Num_Three_Recs")])
+
+# Display the correlation matrix
+print(correlation_age_recommendation)
+
+
+correlation_age_recommendation <- cor(data[, c("Age.at.App.Submission", "Num_Two_Recs")])
+print(correlation_age_recommendation)
+
+```
+
+```{r}
+# Fit a multiple linear regression model
+regression_model <- lm(data$Age.at.App.Submission ~ data$Degree + data$Have.you.ever.failed.a.course. + data$Program..ASE. + data$Sex + data$Entry.Term, data = data)
+
+# Display the summary of the regression model
+summary(regression_model)
+
+```
+
+
+The regression results provide information about the relationship between the dependent variable (Age.at.App.Submission) and various independent variables. Here are some key points to interpret the results:
+
+Coefficients:
+Intercept (32.03): The estimated average age at application submission when all other variables are zero.
+
+Degree:
+
+Master's: For every one-unit increase in holding a Master's degree, the average age decreases by approximately 9.29 units.
+
+MS: The effect is a decrease of approximately 5.98 units.
+
+PhD: The effect is a decrease of approximately 7.05 units.
+
+Have_You_Ever_Failed (0.87): For every one-unit increase in the variable "Have_You_Ever_Failed," the average age increases by 0.87 units.
+
+Program_ASE:
+
+Data Science: The effect is an increase of approximately 0.44 units.
+
+Electrical and Computer Engineering: The effect is a decrease of approximately 0.63 units.
+
+Sex (0.21): Males have an average age that is approximately 0.21 units higher than females.
+
+Entry_Term:
+Various categories: The coefficients represent the estimated change in average age compared to the reference category.
+
+
+Statistical Significance:
+Significance is indicated by the p-values associated with each coefficient.
+Variables with small p-values (typically < 0.05) are considered statistically significant.
+In the results, most variables are statistically significant (indicated by the asterisks).
+
+Model Fit:
+Multiple R-squared: Represents the proportion of the variance in the dependent variable explained by the model. In this case, around 13.15% of the variance in age is explained.
+
+Adjusted R-squared: Takes into account the number of predictors in the model. Adjusted R-squared is slightly lower.
+
+F-statistic: Tests the overall significance of the model. A small p-value (< 0.05) indicates that at least one variable in the model is 
+
+significant. Here, the p-value is < 2.2e-16, suggesting overall significance.
+
+Residuals:
+Residuals represent the differences between observed and predicted values.
+
+
+
+
+
+
