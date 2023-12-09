@@ -1,0 +1,169 @@
+---
+title: "Study Of Applicants Applying for Masters and PhD programs at UofR"
+author: "Anik De, Babli Dey, Sharon Gilbert, Veronica Mata"
+date: "2023-12-09"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- importing student application data from the csv file "application_data_2015_2022.csv" -->
+
+```{r importing student dataset, echo=FALSE}
+applicantData<-read.csv("application_data_2015_2022.csv")
+```
+
+<!-- importing all the library here -->
+```{r import require library, echo=FALSE}
+library(ggplot2)
+```
+
+## Visualization of the data before beginning any analysis (will include unknown data) - Masters v/s PhD:
+
+
+1. What is the annual total no. of applicants, which term recorded the highest and lowest number of applicants?
+```{r no.Of applicants, echo=FALSE}
+
+```
+
+
+2. Identify the top 10 undergraduate institutes from which applicants are applying.
+```{r top 10 undergrad institutes, echo=FALSE}
+
+```
+
+
+3. How do the numbers of applicants vary by gender across different terms?
+```{r applicants by gender, echo=FALSE}
+
+```
+
+
+4. What are the top 10 countries from which applicants have applied to the university?
+```{r  top country of applicants, echo=FALSE}
+
+```
+
+
+5. Determine the total number of applicants who were placed on probation.
+```{r  applicants placed on probation, echo=FALSE}
+
+```
+
+
+6. Determine the total number of applicants who failed a course.
+```{r  applicants failed a course, echo=FALSE}
+
+```
+
+## Data Cleaning: Comment on the steps and also mention if you have modified the data set
+
+
+1. Apply a filter to the dataset based on the 24 specified dimensions.
+```{r  filter dimensions, echo=FALSE}
+
+```
+
+
+2. Change column names to lowercase and use underscores or simpler terms for better interpretability.
+```{r  change the column names, echo=FALSE}
+
+```
+
+
+3. Segment the dataset into two parts: one for master's programs and another for Ph.D. programs.
+```{r  segment dataset into masters and phd program, echo=FALSE}
+
+```
+  
+  
+4. For empty values, categorize them as "Unknown" for categorical data. For age, fill in with the average age corresponding to the    respective program.
+```{r  deal with null values, echo=FALSE}
+
+```
+
+## Descriptive Analysis: Master's and PhD
+
+
+1. Calculate the mean, variance, and standard deviation of age, and visualize the distribution using histograms and box plots.
+```{r  descriptive analysis of age, echo=FALSE}
+
+```
+
+
+2. Examine the acceptance rate based on gender across different terms.
+```{r  acceptance rate by gender, echo=FALSE}
+
+```
+
+
+3. Explore the acceptance rate by country in relation to different terms.
+```{r  acceptance rate by country, echo=FALSE}
+
+```
+  
+  
+4. Investigate the acceptance rate for applicants who were placed on probation.
+```{r  acceptance rate of probation applicants, echo=FALSE}
+
+```
+
+
+5. Investigate the acceptance rate for applicants who failed a course.
+```{r  acceptance rate applicants who failed a course, echo=FALSE}
+
+```
+
+
+6. Investigate the age distribution between applicants who failed a course v/s applicants who did not fail a course.
+```{r  age distribution failed vs not failed a course, echo=FALSE}
+
+```
+
+## Inferential Analysis:
+
+1. Is there a notable distinction in age variance between applicants who have experienced course failure and those who haven't, considering each degree type?
+```{r  age variance hypothesis test, echo=FALSE}
+
+```
+
+
+2. Is there a discernible difference in the average age between master's and Ph.D. students?
+```{r  age variance hypothesis test by program, echo=FALSE}
+
+```
+
+
+3. Compare the acceptance rate for students who learned about the university through family/friends versus those who found it through an internet search.
+```{r  hypothesis test based on how they hear about U of R, echo=FALSE}
+
+```
+
+## Logistic Regression:
+
+1. Can we use factors such as age, citizenship, gender, recommender relationships, current employment status, and program choice to predict the likelihood of a candidate being accepted?
+```{r  logistic regression, echo=FALSE}
+#create more chunks as required
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
