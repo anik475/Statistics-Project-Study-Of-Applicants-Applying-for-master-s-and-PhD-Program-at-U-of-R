@@ -19,42 +19,167 @@ applicantData<-read.csv("application_data_2015_2022.csv")
 ```{r import require library, echo=FALSE}
 library(ggplot2)
 library(dplyr)
+
 ```
 
 ## Visualization of the data before beginning any analysis (will include unknown data) - Masters v/s PhD:
 
 
-1. What is the annual total no. of applicants, which term recorded the highest and lowest number of applicants?
+1.What is the annual total no. of applicants, which term recorded the highest and lowest number of applicants?
 ```{r no.Of applicants, echo=FALSE}
 
+noOfApp<-applicantData %>% group_by(Entry.Term,Degree) %>% 
+  summarise(no_of_application = n(),
+            .groups='drop')
+
+#no.Of Applicants by program
+ggplot(data=noOfApp, aes(x=Entry.Term, y = no_of_application, group=Degree, color = Degree)) + 
+    geom_line() +
+    geom_point()+
+    xlab("Term Year") + ylab("No.Of Applicants")+
+    ggtitle("U of R Student Application - Total No. Applicants Every Fall Term By Program (2015 - 2022)") +
+    theme(plot.title = element_text(size = 10))
+
+```
+```{r applicants by sub-program, echo=FALSE}
+masters<-subset(applicantData,Degree=="Master's")
+phd<-subset(applicantData,Degree=="PhD")
+
+noOfAppM<-masters %>% group_by(Entry.Term,Program..ASE.) %>% 
+  summarise(no_of_application = n(),
+            .groups='drop')
+
+#no.Of Applicants by Masters program
+ggplot(data=noOfAppM, aes(x=Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
+    geom_line() +
+    geom_point()+
+    xlab("Term Year") + ylab("No.Of Applicants") + labs(color = "Program") +
+    ggtitle("U of R Student Application - Total No.of Masters Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
+    theme(plot.title = element_text(size = 10))
+
+#no.Of Applicants by Phd program
+noOfAppP<-phd %>% group_by(Entry.Term,Program..ASE.) %>% 
+  summarise(no_of_application = n(),
+            .groups='drop')
+
+ggplot(data=noOfAppP, aes(x=Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
+    geom_line() +
+    geom_point()+
+    xlab("Term Year") + ylab("No.Of Applicants") + labs(color = "Program") +
+    ggtitle("U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
+    theme(plot.title = element_text(size = 10))
+
+
 ```
 
 
-2. Identify the top 10 undergraduate institutes from which applicants are applying.
+2.Identify the top 10 undergraduate institutes from which applicants are applying.
 ```{r top 10 undergrad institutes, echo=FALSE}
+#split Data by Masters
+
 
 ```
 
 
-3. How do the numbers of applicants vary by gender across different terms?
+3.How do the numbers of applicants vary by gender across different terms?
 ```{r applicants by gender, echo=FALSE}
 
+# Grouping Degree, Term and Gender
+appByGender<- applicantData %>% group_by(Degree,Entry.Term,Sex) %>% 
+  summarise(applicants = n(),
+            .groups='drop') 
+
+# Splitting Data Frame by Degree
+master<-subset(appByGender, Degree=="Master's")
+phD<-subset(appByGender, Degree=="PhD")
+
+# Create a grouped bar chat for No. Of Applicants for Master's by Gender and Term
+ggplot(master, aes(x = Entry.Term, y = applicants, fill = Sex)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "U of R Student Application - No. Of Applicants for Master's by Gender and Term (2015 - 2022)",
+       x = "Term (Years)",
+       y = "Number of Applicants",
+       fill = "Gender") +
+  theme_minimal()+
+  theme(plot.title = element_text(size = 10))
+
+# Create a grouped bar chat for No. Of Applicants for PhD by Gender and Term
+ggplot(phD, aes(x = Entry.Term, y = applicants, fill = Sex)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "U of R Student Application - No. Of Applicants for PhD by Gender and Term (2015 - 2022)",
+       x = "Term (Years)",
+       y = "Number of Applicants",
+       fill = "Gender") +
+  theme_minimal()+
+  theme(plot.title = element_text(size = 10))
+
+
 ```
 
 
-4. What are the top 10 countries from which applicants have applied to the university?
+4.What are the top 10 countries from which applicants have applied to the university?
 ```{r  top country of applicants, echo=FALSE}
 
+# Master Applicants
+appCountryM <- masters %>%
+  group_by(Citizenship, Entry.Term) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count)) %>%
+  top_n(50, wt = Count)
+
+# Create a stacked bar plot
+ggplot(appCountryM, aes(x = reorder(Citizenship, Count), y = Count, fill = Entry.Term)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.9) +
+  
+  # Improve the appearance
+  theme_minimal() +
+  labs(title = "U of R Student Application - No. Of Master's Applicants based on Citizenship Term (2015 - 2022)", 
+       x = "Citizenship Status", 
+       y = "No. Of Applicants") +
+  
+  coord_flip() +
+  
+  # Adjust text size and angle
+  theme(axis.text.y = element_text(size = 10, angle = 45),
+        plot.title = element_text(size = 10, hjust = 0.5),  # Center the title
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8))
+
+#PhD Applicants
+appCountryP <- phd %>%
+  group_by(Citizenship, Entry.Term) %>%
+  summarise(Count = n(), .groups = "drop") %>%
+  arrange(desc(Count)) %>%
+  top_n(50, wt = Count)
+
+# Create a stacked bar plot
+ggplot(appCountryM, aes(x = reorder(Citizenship, Count), y = Count, fill = Entry.Term)) +
+  geom_bar(stat = "identity", position = "stack", width = 0.9) +
+  
+  # Improve the appearance
+  theme_minimal() +
+  labs(title = "U of R Student Application - No. Of PhD Applicants based on Citizenship Term (2015 - 2022)", 
+       x = "Citizenship Status", 
+       y = "No. Of Applicants") +
+  
+  coord_flip() +
+  
+  # Adjust text size and angle
+  theme(axis.text.y = element_text(size = 10, angle = 45),
+        plot.title = element_text(size = 10, hjust = 0.5),  # Center the title
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8))
+
 ```
 
 
-5. Determine the total number of applicants who were placed on probation.
+5.Determine the total number of applicants who were placed on probation.
 ```{r  applicants placed on probation, echo=FALSE}
 
 ```
 
 
-6. Determine the total number of applicants who failed a course.
+6.Determine the total number of applicants who failed a course.
 ```{r  applicants failed a course, echo=FALSE}
 
 ```
@@ -62,7 +187,7 @@ library(dplyr)
 ## Data Cleaning: Comment on the steps and also mention if you have modified the data set
 
 
-1. Apply a filter to the dataset based on the 24 specified dimensions.
+1.Apply a filter to the dataset based on the 24 specified dimensions.
 ```{r  filter dimensions, echo=FALSE}
 #Column to Remove
 column_to_remove <- c("Any.Relatives.Listed.","Spouse.Studying.Applying","Current.Student.","Type","Citizenship2","Institution.3.Degree","Institution.3.Major","Institution.3.Location","Institution.3.Level.of.Study","Institution.3.Name","Job.3.Title","Institution.2.Degree","Institution.2.Major","Institution.2.Location","Institution.2.Level.of.Study","Institution.2.Name","Job.2.Title","Job.1.Title","Sub.Category","Previously.Applied.","How.Applicant.Heard...Other")
@@ -74,7 +199,7 @@ column_names <- colnames(applicantData)
 ```
 
 
-2. Change column names to lowercase and use underscores or simpler terms for better interpretability.
+2.Change column names to lowercase and use underscores or simpler terms for better interpretability.
 ```{r  change the column names, echo=FALSE}
 # Renaming column names
 # Define new column names
@@ -122,11 +247,11 @@ empty_or_na_counts <- sapply(applicantData, function(x) sum(x == "" | is.na(x)))
 sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
 #print(sorted_counts)
 
-applicantData
+#applicantData
 ```
 
 
-3. Segment the dataset into two parts: one for master's programs and another for Ph.D. programs.
+3.Segment the dataset into two parts: one for master's programs and another for Ph.D. programs.
 ```{r  segment dataset into masters and phd program, echo=FALSE}
 # Create a DataFrame for applicants with a phd degree
 phd_data <- subset(applicantData, degree == 'PhD')
@@ -135,9 +260,9 @@ phd_data <- subset(applicantData, degree == 'PhD')
 #write.csv(phd_data, file = 'phd_data.csv', row.names = FALSE)
 
 # Check the number of columns and missing values in the phd dataset
-cat("Number of columns in phd_data: ", ncol(phd_data), "\n")
-cat("\nMissing values in phd_data:\n")
-print(sapply(phd_data, function(x) sum(is.na(x) | x == "")))
+#cat("Number of columns in phd_data: ", ncol(phd_data), "\n")
+#cat("\nMissing values in phd_data:\n")
+#print(sapply(phd_data, function(x) sum(is.na(x) | x == "")))
 
 
 
@@ -148,25 +273,24 @@ masters_data <- subset(applicantData, degree == "Master's")
 #write.csv(masters_data, file = 'masters_data.csv', row.names = FALSE)
 
 # Check the number of columns and missing values in the master's dataset
-cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
-cat("\nMissing values in masters_data:\n")
+#cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
+#cat("\nMissing values in masters_data:\n")
 #print(sapply(masters_data, function(x) sum(is.na(x) | x == "")))
-phd_data
-masters_data
+
 ```
   
   
-4. For empty values, categorize them as "Unknown" for categorical data. For age, fill in with the average age corresponding to the    respective program.
+4.For empty values, categorize them as "Unknown" for categorical data. For age, fill in with the average age corresponding to the respective program.
 ```{r  deal with null values, echo=FALSE}
 #mean age in masters
 mean_age <- mean(masters_data$age , na.rm = TRUE)
 masters_mean_age <- round(mean_age)
-cat("The masters mean age is:", masters_mean_age, "\n")
+#cat("The masters mean age is:", masters_mean_age, "\n")
 
 #mean age in phd
 mean_age <- mean(phd_data$age , na.rm = TRUE)
 phd_mean_age <- round(mean_age)
-cat("The phd mean age is:", phd_mean_age, "\n")
+#cat("The phd mean age is:", phd_mean_age, "\n")
 
 #Replacing missing age values with the rounded value in the masters_data 
 masters_data$age <- ifelse(is.na(masters_data$age), masters_mean_age, masters_data$age)
@@ -181,8 +305,8 @@ mode_sex_masters <- names(sort(table(masters_data$sex), decreasing = TRUE)[1])
 # Find the mode of the 'sex' column in phd_data
 mode_sex_phd <- names(sort(table(phd_data$sex), decreasing = TRUE)[1])
 
-cat("Mode of the 'sex' column in masters_data: ", mode_sex_masters, "\n")
-cat("Mode of the 'sex' column in phd_data: ", mode_sex_phd, "\n")
+#cat("Mode of the 'sex' column in masters_data: ", mode_sex_masters, "\n")
+#cat("Mode of the 'sex' column in phd_data: ", mode_sex_phd, "\n")
 
 # Fill missing values in 'sex' column in masters_data with the mode
 masters_data$sex[is.na(masters_data$sex) | masters_data$sex == ""] <- mode_sex_masters
@@ -197,8 +321,8 @@ mode_probation_masters <- names(sort(table(masters_data$academic_probation), dec
 # Find the mode of the 'sex' column in phd_data
 mode_probation_phd <- names(sort(table(phd_data$academic_probation), decreasing = TRUE)[1])
 
-cat("Mode of the 'academic_probation' column in masters_data: ", mode_probation_masters, "\n")
-cat("Mode of the 'academic_probation' column in phd_data: ", mode_probation_phd, "\n")
+#cat("Mode of the 'academic_probation' column in masters_data: ", mode_probation_masters, "\n")
+#cat("Mode of the 'academic_probation' column in phd_data: ", mode_probation_phd, "\n")
 
 # Fill missing values in 'academic_probation' column in masters_data with the mode
 masters_data$academic_probation[is.na(masters_data$academic_probation) | masters_data$academic_probation == ""] <- mode_probation_masters
@@ -214,8 +338,8 @@ mode_failed_masters <- names(sort(table(masters_data$failed_course ), decreasing
 # Find the mode of the 'failed_course ' column in phd_data
 mode_failed_phd <- names(sort(table(phd_data$failed_course), decreasing = TRUE)[1])
 
-cat("Mode of the 'failed_course ' column in masters_data: ", mode_failed_masters, "\n")
-cat("Mode of the 'failed_course ' column in phd_data: ", mode_failed_phd, "\n")
+#cat("Mode of the 'failed_course ' column in masters_data: ", mode_failed_masters, "\n")
+#cat("Mode of the 'failed_course ' column in phd_data: ", mode_failed_phd, "\n")
 
 # Fill missing values in 'failed_course' column in masters_data with the mode
 masters_data$failed_course [is.na(masters_data$failed_course ) | masters_data$failed_course  == ""] <- mode_failed_masters
@@ -269,13 +393,13 @@ if (length(missing_indices_Num_Three_Recs) > 0) {
 }
 
 # Check the number of columns and missing values in the master's dataset
-cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
-cat("\nMissing values in masters_data:\n")
+#cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
+#cat("\nMissing values in masters_data:\n")
 #print(sapply(masters_data, function(x) sum(is.na(x) | x == "")))
 
 # Check the number of columns and missing values in the phd dataset
-cat("Number of columns in phd_data: ", ncol(masters_data), "\n")
-cat("\nMissing values in phd_data:\n")
+#cat("Number of columns in phd_data: ", ncol(masters_data), "\n")
+#cat("\nMissing values in phd_data:\n")
 #print(sapply(phd_data, function(x) sum(is.na(x) | x == "")))
 
 ```
