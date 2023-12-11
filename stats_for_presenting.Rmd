@@ -18,6 +18,7 @@ applicantData<-read.csv("application_data_2015_2022.csv")
 <!-- importing all the library here -->
 ```{r import require library, echo=FALSE}
 library(ggplot2)
+library(dplyr)
 ```
 
 ## Visualization of the data before beginning any analysis (will include unknown data) - Masters v/s PhD:
@@ -63,24 +64,219 @@ library(ggplot2)
 
 1. Apply a filter to the dataset based on the 24 specified dimensions.
 ```{r  filter dimensions, echo=FALSE}
+#Column to Remove
+column_to_remove <- c("Any.Relatives.Listed.","Spouse.Studying.Applying","Current.Student.","Type","Citizenship2","Institution.3.Degree","Institution.3.Major","Institution.3.Location","Institution.3.Level.of.Study","Institution.3.Name","Job.3.Title","Institution.2.Degree","Institution.2.Major","Institution.2.Location","Institution.2.Level.of.Study","Institution.2.Name","Job.2.Title","Job.1.Title","Sub.Category","Previously.Applied.","How.Applicant.Heard...Other")
+
+applicantData <- applicantData[, !colnames(applicantData) %in% column_to_remove]
+column_names <- colnames(applicantData)
+#print(column_names)
 
 ```
 
 
 2. Change column names to lowercase and use underscores or simpler terms for better interpretability.
 ```{r  change the column names, echo=FALSE}
+# Renaming column names
+# Define new column names
+new_column_names <- c(
+  "reference", "program", "degree", "entry_term",
+  "time_status", "decision", "sex", "birth_country",
+  "age", "native_language", "citizenship_status",
+  "citizenship", "failed_course", "academic_probation",
+  "inst_1_name", "inst_1_location",
+  "inst_1_study_level", "inst_1_degree",
+  "inst_1_major", "currently_employed",
+  "heard_about_UR", "other_schools_applying"
+)
 
+# Rename specified columns
+colnames(applicantData)[colnames(applicantData) %in% c(
+  "Ref", "Program..ASE.", "Degree", "Entry.Term",
+  "Time.Status", "Decision.1", "Sex", "Birth.Country",
+  "Age.at.App.Submission", "Native.Language", "Citizenship",
+  "Citizenship1", "Have.you.ever.failed.a.course.",
+  "Ever.Placed.on.Academic.Probation", "Institution.1.Name",
+  "Institution.1.Location", "Institution.1.Level.of.Study",
+  "Institution.1.Degree", "Institution.1.Major",
+  "Currently.Employed.", "How.Applicant.Heard.About.UR",
+  "Other.Schools.Applying.To"
+)] <- new_column_names
+
+#handling recommender 1,2,3 columns 
+applicantData <- applicantData %>%
+  mutate(Num_Two_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "") +
+                        (Recommender.1.Relationship != "" & Recommender.3.Relationship != "") +
+                        (Recommender.2.Relationship != "" & Recommender.3.Relationship != ""),
+         Num_Three_Recs = (Recommender.1.Relationship != "" & Recommender.2.Relationship != "" & Recommender.3.Relationship != ""))
+
+#dropping recommender 1,2,3 columns 
+column_to_remove <- c("Recommender.1.Relationship","Recommender.2.Relationship","Recommender.3.Relationship")
+applicantData <- applicantData[, !colnames(applicantData) %in% column_to_remove]
+
+# Updated column names
+print(colnames(applicantData))
+
+# printing the number of missing values present in each column
+print("Count of missing values by column") 
+empty_or_na_counts <- sapply(applicantData, function(x) sum(x == "" | is.na(x)))
+sorted_counts <- sort(empty_or_na_counts, decreasing = TRUE)
+#print(sorted_counts)
+
+applicantData
 ```
 
 
 3. Segment the dataset into two parts: one for master's programs and another for Ph.D. programs.
 ```{r  segment dataset into masters and phd program, echo=FALSE}
+# Create a DataFrame for applicants with a phd degree
+phd_data <- subset(applicantData, degree == 'PhD')
 
+# Save the master's dataset to a CSV file
+#write.csv(phd_data, file = 'phd_data.csv', row.names = FALSE)
+
+# Check the number of columns and missing values in the phd dataset
+cat("Number of columns in phd_data: ", ncol(phd_data), "\n")
+cat("\nMissing values in phd_data:\n")
+print(sapply(phd_data, function(x) sum(is.na(x) | x == "")))
+
+
+
+# Create a DataFrame for applicants with a master's degree
+masters_data <- subset(applicantData, degree == "Master's")
+
+# Save the master's dataset to a CSV file
+#write.csv(masters_data, file = 'masters_data.csv', row.names = FALSE)
+
+# Check the number of columns and missing values in the master's dataset
+cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
+cat("\nMissing values in masters_data:\n")
+#print(sapply(masters_data, function(x) sum(is.na(x) | x == "")))
+phd_data
+masters_data
 ```
   
   
 4. For empty values, categorize them as "Unknown" for categorical data. For age, fill in with the average age corresponding to the    respective program.
 ```{r  deal with null values, echo=FALSE}
+#mean age in masters
+mean_age <- mean(masters_data$age , na.rm = TRUE)
+masters_mean_age <- round(mean_age)
+cat("The masters mean age is:", masters_mean_age, "\n")
+
+#mean age in phd
+mean_age <- mean(phd_data$age , na.rm = TRUE)
+phd_mean_age <- round(mean_age)
+cat("The phd mean age is:", phd_mean_age, "\n")
+
+#Replacing missing age values with the rounded value in the masters_data 
+masters_data$age <- ifelse(is.na(masters_data$age), masters_mean_age, masters_data$age)
+
+#Replacing missing age values with the rounded value in the phd_data 
+phd_data$age <- ifelse(is.na(phd_data$age), phd_mean_age, phd_data$age)
+
+## HANDLING 'SEX' COLUMN
+# Find the mode of the 'sex' column in masters_data
+mode_sex_masters <- names(sort(table(masters_data$sex), decreasing = TRUE)[1])
+
+# Find the mode of the 'sex' column in phd_data
+mode_sex_phd <- names(sort(table(phd_data$sex), decreasing = TRUE)[1])
+
+cat("Mode of the 'sex' column in masters_data: ", mode_sex_masters, "\n")
+cat("Mode of the 'sex' column in phd_data: ", mode_sex_phd, "\n")
+
+# Fill missing values in 'sex' column in masters_data with the mode
+masters_data$sex[is.na(masters_data$sex) | masters_data$sex == ""] <- mode_sex_masters
+
+# Fill missing values in 'sex' column in phd_data with the mode
+phd_data$sex[is.na(phd_data$sex) | phd_data$sex == ""] <- mode_sex_phd
+
+##HANDLING ACADEMIC PROBATION COLUMN
+# Find the mode of the 'academic_probation' column in masters_data
+mode_probation_masters <- names(sort(table(masters_data$academic_probation), decreasing = TRUE)[1])
+
+# Find the mode of the 'sex' column in phd_data
+mode_probation_phd <- names(sort(table(phd_data$academic_probation), decreasing = TRUE)[1])
+
+cat("Mode of the 'academic_probation' column in masters_data: ", mode_probation_masters, "\n")
+cat("Mode of the 'academic_probation' column in phd_data: ", mode_probation_phd, "\n")
+
+# Fill missing values in 'academic_probation' column in masters_data with the mode
+masters_data$academic_probation[is.na(masters_data$academic_probation) | masters_data$academic_probation == ""] <- mode_probation_masters
+
+# Fill missing values in 'academic_probation' column in phd_data with the mode
+phd_data$academic_probation[is.na(phd_data$academic_probation) | phd_data$academic_probation == ""] <- mode_probation_phd
+
+
+##HANDLING FAILED COURSE COLUMN
+# Find the mode of the 'failed_course ' column in masters_data
+mode_failed_masters <- names(sort(table(masters_data$failed_course ), decreasing = TRUE)[1])
+
+# Find the mode of the 'failed_course ' column in phd_data
+mode_failed_phd <- names(sort(table(phd_data$failed_course), decreasing = TRUE)[1])
+
+cat("Mode of the 'failed_course ' column in masters_data: ", mode_failed_masters, "\n")
+cat("Mode of the 'failed_course ' column in phd_data: ", mode_failed_phd, "\n")
+
+# Fill missing values in 'failed_course' column in masters_data with the mode
+masters_data$failed_course [is.na(masters_data$failed_course ) | masters_data$failed_course  == ""] <- mode_failed_masters
+
+# Fill missing values in 'failed_course' column in phd_data with the mode
+phd_data$failed_course [is.na(phd_data$failed_course ) | phd_data$failed_course  == ""] <- mode_failed_phd
+
+
+##HANDLING OTHER CATEGORICAL FEATURES
+# Columns to replace missing values with 'unknown'
+columns_to_replace <- c('time_status', 'decision', 'inst_1_name', 'inst_1_location', 'inst_1_study_level', 'inst_1_degree', 'inst_1_major')
+
+# Replace missing values with 'unknown' in masters_data
+masters_data[, columns_to_replace] <- lapply(masters_data[, columns_to_replace], function(x) ifelse(is.na(x) | x == "", "unknown", x))
+
+# Replace missing values with 'unknown' in phd_data
+phd_data[, columns_to_replace] <- lapply(phd_data[, columns_to_replace], function(x) ifelse(is.na(x) | x == "", "unknown", x))
+
+# Replace missing values with 'unknown sources' in masters_data
+masters_data$heard_about_UR <- ifelse(is.na(masters_data$heard_about_UR) | masters_data$heard_about_UR == "", "unknown sources", masters_data$heard_about_UR)
+
+# Replace missing values with 'unknown sources' in phd_data
+phd_data$heard_about_UR <- ifelse(is.na(phd_data$heard_about_UR) | phd_data$heard_about_UR == "", "unknown sources", phd_data$heard_about_UR)
+
+# Columns to replace missing values with 'not mentioned'
+columns_to_replace <- c('birth_country', 'other_schools_applying','native_language','citizenship_status','citizenship')
+
+# Replace missing values with 'not mentioned' in masters_data
+masters_data[, columns_to_replace] <- lapply(masters_data[, columns_to_replace], function(x) ifelse(is.na(x) | x == "", "not mentioned", x))
+
+# Replace missing values with 'not mentioned' in phd_data
+phd_data[, columns_to_replace] <- lapply(phd_data[, columns_to_replace], function(x) ifelse(is.na(x) | x == "", "not mentioned", x))
+
+# Find unique values in the 'Num_Two_Recs' column
+unique_values_Num_Two_Recs <- unique(masters_data$Num_Two_Recs)
+
+# Find unique values in the 'Num_Three_Recs' column
+unique_values_Num_Three_Recs <- unique(masters_data$Num_Three_Recs)
+
+# Identify and replace missing values
+missing_indices_Num_Two_Recs <- which(is.na(masters_data$Num_Two_Recs))
+missing_indices_Num_Three_Recs <- which(is.na(masters_data$Num_Three_Recs))
+
+# Replace missing values with any unique value from the respective columns
+if (length(missing_indices_Num_Two_Recs) > 0) {
+  masters_data$Num_Two_Recs[missing_indices_Num_Two_Recs] <- unique_values_Num_Two_Recs[1]
+}
+
+if (length(missing_indices_Num_Three_Recs) > 0) {
+  masters_data$Num_Three_Recs[missing_indices_Num_Three_Recs] <- unique_values_Num_Three_Recs[1]
+}
+
+# Check the number of columns and missing values in the master's dataset
+cat("Number of columns in masters_data: ", ncol(masters_data), "\n")
+cat("\nMissing values in masters_data:\n")
+#print(sapply(masters_data, function(x) sum(is.na(x) | x == "")))
+
+# Check the number of columns and missing values in the phd dataset
+cat("Number of columns in phd_data: ", ncol(masters_data), "\n")
+cat("\nMissing values in phd_data:\n")
+#print(sapply(phd_data, function(x) sum(is.na(x) | x == "")))
 
 ```
 
