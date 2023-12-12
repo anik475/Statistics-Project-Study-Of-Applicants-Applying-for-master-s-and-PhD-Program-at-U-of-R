@@ -131,7 +131,7 @@ geom_bar(stat = "identity", position = "stack", width = 0.9) +
   
 # Improve the appearance
   theme_minimal() +
-  labs(title = "U of R Student Application - No. Of Master's Applicants based on Citizenship Term (2015 - 2022)", 
+  labs(title = "U of R Student Application - No. Of Master's Applicants based on Citizenship By Term (2015 - 2022)", 
   x = "Citizenship Status", 
   y = "No. Of Applicants") +
   
@@ -156,7 +156,7 @@ ggplot(appCountryM, beside = TRUE, aes(x = reorder(Citizenship, Count), y = Coun
   
   # Improve the appearance
   theme_minimal() +
-  labs(title = "U of R Student Application - No. Of PhD Applicants based on Citizenship Term (2015 - 2022)", 
+  labs(title = "U of R Student Application - No. Of PhD Applicants based on Citizenship By Term (2015 - 2022)", 
        x = "Citizenship Status", 
        y = "No. Of Applicants") +
   
@@ -240,8 +240,8 @@ nCourseP<-pCourse %>% group_by(Entry.Term,courseStatus) %>%
 ggplot(nCourseP, aes(x=Entry.Term, y = applicant, color = courseStatus, group = courseStatus)) + 
     geom_line() +
     geom_point()+
-    labs(color = "Ever Placed on Probation",x="Term Year",y="No.Of Applicants",fill="Probation Status") +
-    ggtitle("U of R Student Application - Total No.of PhD Applicants By Probation Status and Term (2015 - 2022)") +
+    labs(color = "Ever failed a Test",x="Term Year",y="No.Of Applicants",fill="Course Status") +
+    ggtitle("U of R Student Application - Total No.of PhD Applicants By Failed A course Status and Term (2015 - 2022)") +
     theme(plot.title = element_text(size = 8))
 ```
 
@@ -423,10 +423,6 @@ phd_data$decision_status<-ifelse(phd_data$decision=="Deny","deny",
 
 ```
 
-```{r, echo=FALSE}
-write.csv(masters_data,"masters.csv")
-write.csv(phd_data,"pdh.csv")
-```
 ## Descriptive Analysis: Master's and PhD
 
 
@@ -483,86 +479,80 @@ ggplot(phd_data, aes(y = age,x=entry_term))+geom_boxplot(outlier.size = 1.5 )+la
 2.Examine the acceptance rate based on gender across different terms.
 ```{r  acceptance rate by gender, echo=FALSE}
 #masters data
-m_contingency_table<-table(masters_data$sex, masters_data$entry_term, masters_data$decision_status)
+m_contingency_table <- table(masters_data$sex, masters_data$entry_term, masters_data$decision_status)
 m_proportions_by_gender <- prop.table(m_contingency_table, margin = 1)
 m_proportions_df <- as.data.frame(as.table(m_proportions_by_gender))
-m_proportions_accepted <- m_proportions_df %>% filter(Var3 == "accept")
-m_proportions_M <- m_proportions_accepted[m_proportions_accepted$Var1 == "M", ]
-m_proportions_F <- m_proportions_accepted[m_proportions_accepted$Var1 == "F", ]
-m_merged_proportions <- rbind(m_proportions_M, m_proportions_F)
+
+m_merged_proportions <- m_proportions_df %>%
+  filter(Var3 == "accept", Var1 %in% c("M", "F")) %>%
+  arrange(Var1)
+
 print(m_merged_proportions)
 
-
 ggplot(m_merged_proportions, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Gender Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=10))
 
 #Phd data
-p_contingency_table<-table(phd_data$sex, phd_data$entry_term, phd_data$decision_status)
+p_contingency_table <- table(phd_data$sex, phd_data$entry_term, phd_data$decision_status)
 p_proportions_by_gender <- prop.table(p_contingency_table, margin = 1)
 p_proportions_df <- as.data.frame(as.table(p_proportions_by_gender))
-p_proportions_accepted <- p_proportions_df %>% filter(Var3 == "accept")
-p_proportions_M <- p_proportions_accepted[p_proportions_accepted$Var1 == "M", ]
-p_proportions_F <- p_proportions_accepted[p_proportions_accepted$Var1 == "F", ]
-p_merged_proportions <- rbind(p_proportions_M, p_proportions_F)
+p_merged_proportions <- p_proportions_df %>%
+  filter(Var3 == "accept", Var1 %in% c("M", "F")) %>%
+  arrange(Var1)
+
 print(p_merged_proportions)
 
-
 ggplot(p_merged_proportions, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Gender Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=10))
+
 ```
 
 
 3.Explore the acceptance rate by country in relation to different terms.
 ```{r  acceptance rate by country, echo=FALSE}
+
 #masters data
-m_citizen_contingency_table<-table(masters_data$citizenship_status, masters_data$entry_term, masters_data$decision_status)
+m_citizen_contingency_table <- table(masters_data$citizenship_status, masters_data$entry_term, masters_data$decision_status)
 m_proportions_by_citizen <- prop.table(m_citizen_contingency_table, margin = 1)
 m_citizen_proportions_df <- as.data.frame(as.table(m_proportions_by_citizen))
-m_citizen_proportions_accepted <- m_citizen_proportions_df %>% filter(Var3 == "accept")
-m_proportions_FN <- m_citizen_proportions_accepted[m_citizen_proportions_accepted$Var1 == "FN", ]
-m_proportions_US <- m_citizen_proportions_accepted[m_citizen_proportions_accepted$Var1 == "US", ]
-m_proportions_PR <- m_citizen_proportions_accepted[m_citizen_proportions_accepted$Var1 == "PR", ]
-m_proportions_UN <- m_citizen_proportions_accepted[m_citizen_proportions_accepted$Var1 == "unknown", ]
-m_merged_citizen <- rbind(m_proportions_FN, m_proportions_US,m_proportions_PR,m_proportions_UN)
+
+m_merged_citizen <- m_citizen_proportions_df %>%
+  filter(Var3 == "accept", Var1 %in% c("FN", "US", "PR", "unknown")) %>%
+  arrange(Var1)
+
 print(m_merged_citizen)
 
-
 ggplot(m_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Gender Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship status Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+
 
 #Phd data
-p_citizen_contingency_table<-table(phd_data$citizenship_status, phd_data$entry_term, phd_data$decision_status)
+p_citizen_contingency_table <- table(phd_data$citizenship_status, phd_data$entry_term, phd_data$decision_status)
 p_proportions_by_citizen <- prop.table(p_citizen_contingency_table, margin = 1)
 p_citizen_proportions_df <- as.data.frame(as.table(p_proportions_by_citizen))
-p_citizen_proportions_accepted <- p_citizen_proportions_df %>% filter(Var3 == "accept")
-p_proportions_FN <- p_citizen_proportions_accepted[p_citizen_proportions_accepted$Var1 == "FN", ]
-p_proportions_US <- p_citizen_proportions_accepted[p_citizen_proportions_accepted$Var1 == "US", ]
-p_proportions_PR <- p_citizen_proportions_accepted[p_citizen_proportions_accepted$Var1 == "PR", ]
-p_proportions_UN <- p_citizen_proportions_accepted[p_citizen_proportions_accepted$Var1 == "unknown", ]
-p_merged_citizen <- rbind(p_proportions_FN, p_proportions_US,p_proportions_PR,p_proportions_UN)
+p_merged_citizen <- p_citizen_proportions_df %>%
+  filter(Var3 == "accept") %>%
+  filter(Var1 %in% c("FN", "US", "PR", "unknown")) %>%
+  arrange(Var1)
+
 print(p_merged_citizen)
 
-
 ggplot(p_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Gender Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
 
 ```
-  
   
 4.Investigate the acceptance rate for applicants who were placed on probation.
 ```{r  acceptance rate of probation applicants, echo=FALSE}
 m_probation<-subset(masters_data,decision_status=="accept" & academic_probation=="1")
 m_pro<- m_probation %>%group_by(citizenship_status) %>% summarise(applicant=n())
 
-
-pie_chart <- ggplot(m_pro, aes(x = "", y = applicant, fill = citizenship_status)) +
+ggplot(m_pro, aes(x = "", y = applicant, fill = citizenship_status)) +
   geom_bar(stat = "identity", width = 1, color = "white") +
   coord_polar("y") +
   theme_void() +  # Removes unnecessary elements
   scale_fill_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3"))
 
-pie_chart
-#m_pro
 ```
 
 
@@ -574,17 +564,35 @@ pie_chart
 
 6.Investigate the age distribution between applicants who failed a course v/s applicants who did not fail a course.
 ```{r  age distribution failed vs not failed a course, echo=FALSE} 
-# Function to see distributions 
-create_filtered_histogram <- function(data, plot_column, filter_column, filter_value, binwidth = 0.5, fill_color = "pink", text) {  
-# Create the histogram  
-ggplot(data, aes(x = !!sym(plot_column))) +    geom_histogram(binwidth = binwidth, fill = fill_color, color = "black") +    theme_minimal() +    labs(title = text,         x = plot_column,         y = "Frequency") +    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
-} 
+# Function to see distributions
+create_filtered_histogram <- function(data, plot_column, filter_column, filter_value, binwidth = 0.5, fill_color = "pink", text) {
+  # Filter the data based on the filter_column and filter_value
+  filtered_data <- data %>% filter(!!sym(filter_column) == filter_value)
+  
+  # Create the histogram using the filtered data
+  ggplot(filtered_data, aes_string(x = plot_column)) +
+    geom_histogram(binwidth = binwidth, fill = fill_color, color = "black") +
+    theme_minimal() +
+    labs(title = text, 
+         x = plot_column, 
+         y = "Frequency") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+    theme(plot.title = element_text(size = 10))
+}
 
-create_filtered_histogram(masters_data, "age", "failed_course", 0, 0.5, "green","U of R Student Application - Master's Applicants Never Failed a Course (2015 -2022)") 
 
-create_filtered_histogram(masters_data, "age", "failed_course", 1, 0.5, "yellow","U of R Student Application - Master's Applicants Ever Failed a Course (2015 -2022)") 
+# To help respond 3rd sub question of th primary question
+create_filtered_histogram(masters_data, "age", "failed_course", 0, 0.5, "green","U of R Student Application - Master's Applicants Never Failed a Course")
+create_filtered_histogram(masters_data, "age", "failed_course", 1, 0.5, "yellow","U of R Student Application - Master's Applicants Failed a Course ")
 
-ggplot(applicantData, aes(x = degree, y = age)) +  geom_boxplot() +  theme_minimal() +  labs(title = "U of R Student Application - Age Distribution by Degree (2015 -2022)",       x = "Degree",       y = "Age") +  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+ggplot(applicantData, aes(x = degree, y = age)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Age Distribution by Degree", 
+       x = "Degree", 
+       y = "Age at Application Submission") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
 
@@ -697,15 +705,61 @@ $$
 ## Logistic Regression:
 
 1. Can we use factors such as age, citizenship, gender, recommender relationships, current employment status, and program choice to predict the likelihood of a candidate being accepted?
+```{r merge data, echo=FALSE}
+rows_to_keep_masters <- nrow(masters_data) 
+rows_to_keep_phd <- nrow(phd_data)
+ 
+ 
+# Randomly sample rows from df1
+reduced_masters <- sample_n(masters_data, size = rows_to_keep_masters)
+reduced_phd <- sample_n(phd_data, size = rows_to_keep_phd )
+ 
+# Merge the reduced df1 with df2
+merged_data_masters_phd <- rbind(reduced_masters, reduced_phd)
+```
+
 ```{r  logistic regression - preparing data, echo=FALSE}
+
+merged_data_masters_phd <- na.omit(merged_data_masters_phd)
+categorical_vars <- c("program", "degree", "entry_term", "time_status", 
+                      "sex","citizenship_status","failed_course",
+                      "academic_probation",
+                      "inst_1_degree","heard_about_UR")                                                  
+#print(categorical_vars)
+categorical_vars <- categorical_vars[categorical_vars %in% colnames(merged_data_masters_phd)]
+print(categorical_vars)
+merged_data_masters_phd[categorical_vars] <- lapply(merged_data_masters_phd[categorical_vars], factor)
 ```
 
 ```{r logistic regression - model building, echo=FALSE}
-
+modelTrainingfeatures  <- select(merged_data_masters_phd, program, degree, entry_term, time_status, 
+               sex, citizenship_status, inst_1_degree, heard_about_UR, 
+               age, failed_course, academic_probation, decision_status)
+ 
+modelTrainingfeatures$decision_status <- ifelse(merged_data_masters_phd$decision_status == "accept", 1, 0)
+ 
+#Splitting the dataset into 70% Training and 30% Testing
+#Splitting the dataset into 70% Training and 30% Testing
+set.seed(123) # for reproducible results
+split <- sample.split(modelTrainingfeatures$decision_status, SplitRatio = 0.7)
+train <- subset(modelTrainingfeatures, split == TRUE)
+test <- subset(modelTrainingfeatures, split == FALSE)
 
 ```
 
 ```{r logistic regression - prediction and accuracy, echo=FALSE}
+model <- glm(decision_status ~ ., data = train, family = "binomial")
+print(summary(model))
+ 
+ 
+predictions <- predict(model, newdata = test, type = "response")
+predicted_classes <- ifelse(predictions > 0.50, 1, 0)
+# Confusion matrix for the test set
+conf_matrix <- table(Predicted = predicted_classes, Actual = test$decision_status)
+print(conf_matrix)
+# Calculate accuracy on the test set
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+print(paste("Accuracy:", accuracy))
 
 ```
 
