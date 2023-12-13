@@ -16,10 +16,11 @@ applicantData<-read.csv("application_data_2015_2022.csv")
 ```
 
 <!-- importing all the library here -->
-```{r import require library, echo=FALSE}
+```{r import require library, echo=FALSE, message=FALSE}
 library(ggplot2)
 library(dplyr)
 library(caTools)
+library(tidyr)
 
 ```
 
@@ -29,50 +30,56 @@ library(caTools)
 1.What is the annual total no. of applicants, which term recorded the highest and lowest number of applicants?
 ```{r no.Of applicants, echo=FALSE}
 
-noOfApp<-applicantData %>% group_by(Entry.Term,Degree) %>% 
-  summarise(no_of_application = n(),
-            .groups='drop')
+noOfApp <- applicantData %>% 
+  group_by(Entry.Term, Degree) %>% 
+  summarise(no_of_application = n(), .groups = 'drop')
 
-#no.Of Applicants by program
-ggplot(data=noOfApp, aes(x=Entry.Term, y = no_of_application, group=Degree, color = Degree)) + 
-    geom_line() +
-    geom_point()+
-    xlab("Term Year") + ylab("No.Of Applicants")+
-    ggtitle("U of R Student Application - Total No. Applicants Every Fall Term By Program (2015 - 2022)") +
-    theme(plot.title = element_text(size = 10))
+
+ggplot(data = noOfApp, aes(x = Entry.Term, y = no_of_application, group = Degree, color = Degree)) + 
+  geom_line() +
+  geom_point() +
+  xlab("Term") + ylab("Number of Applicants") +
+  ggtitle("U of R Student Application - Number of Applicants by Program (2015 - 2022)") +
+  theme(plot.title = element_text(size = 12, hjust = 0.5)) +
+  scale_color_brewer(palette = "Set1")
+
 
 ```
 ```{r applicants by sub-program, echo=FALSE}
 masters<-subset(applicantData,Degree=="Master's")
 phd<-subset(applicantData,Degree=="PhD")
 
-noOfAppM<-masters %>% group_by(Entry.Term,Program..ASE.) %>% 
-  summarise(no_of_application = n(),
-            .groups='drop')
+noOfAppM <- masters %>% 
+  group_by(Entry.Term, Program..ASE.) %>% 
+  summarise(no_of_application = n(), .groups = 'drop')
 
-#no.Of Applicants by Masters program
-ggplot(data=noOfAppM, aes(x=Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
-    geom_line() +
-    geom_point()+
-    xlab("Term Year") + ylab("No.Of Applicants") + labs(color = "Program") +
-    ggtitle("U of R Student Application - Total No.of Masters Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
-    theme(plot.title = element_text(size = 8))
+# Plotting
+ggplot(data = noOfAppM, aes(x = Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
+  geom_line() +
+  geom_point() +
+  xlab("Term") + ylab("Number of Applicants") + 
+  labs(color = "Program") +
+  ggtitle("U of R Student Application - Number of Master's Sub-Program Applicants by Program (2015 - 2022)") +
+  theme(plot.title = element_text(size = 8, hjust = 0.5)) 
+  
 ```
+
 ```{r no.Of Applicants by Phd program, echo=FALSE}
 #no.Of Applicants by Phd program
 noOfAppP<-phd %>% group_by(Entry.Term,Program..ASE.) %>% 
   summarise(no_of_application = n(),
             .groups='drop')
 
+#plotting
 ggplot(data=noOfAppP, aes(x=Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
-    geom_line() +
-    geom_point()+
-    xlab("Term Year") + ylab("No.Of Applicants") + labs(color = "Program") +
-    ggtitle("U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
-    theme(plot.title = element_text(size = 8))
+  geom_line() +
+  geom_point()+
+  xlab("Term Year") + ylab("No.Of Applicants") + 
+  labs(color = "Program") +
+  ggtitle("U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
+  theme(plot.title = element_text(size = 8, hjust = 0.5))
 ```
-
-
+\hrule
 2.Identify the top 10 undergraduate institutes from which applicants are applying.
 ```{r top 10 undergrad institutes, echo=FALSE}
 
@@ -80,43 +87,46 @@ ggplot(data=noOfAppP, aes(x=Entry.Term, y = no_of_application, group = Program..
 
 
 3.How do the numbers of applicants vary by gender across different terms?
-```{r applicants by gender, echo=FALSE}
 
-# Grouping Degree, Term and Gender
-appByGender<- applicantData %>% group_by(Degree,Entry.Term,Sex) %>% 
-  summarise(applicants = n(),
-            .groups='drop') 
+```{r masters applicants by gender, echo=FALSE}
 
-# Splitting Data Frame by Degree
-master<-subset(appByGender, Degree=="Master's")
-phD<-subset(appByGender, Degree=="PhD")
+# Grouping Term and Gender
+mByGender <- masters %>% 
+  group_by(Degree, Entry.Term, Sex) %>% 
+  summarise(applicants = n(), .groups = 'drop')
 
-# Create a grouped bar chat for No. Of Applicants for Master's by Gender and Term
-ggplot(master, aes(x = Entry.Term, y = applicants, fill = Sex)) +
+# Create a grouped bar chart for No. Of Applicants for Master's by Gender and Term
+ggplot(mByGender, aes(x = Entry.Term, y = applicants, fill = Sex)) +
   geom_bar(stat = "identity", position = "dodge") +
   labs(title = "U of R Student Application - No. Of Applicants for Master's by Gender and Term (2015 - 2022)",
        x = "Term (Years)",
        y = "Number of Applicants",
        fill = "Gender") +
-  theme_minimal()+
-  theme(plot.title = element_text(size = 10))
-
-# Create a grouped bar chat for No. Of Applicants for PhD by Gender and Term
-ggplot(phD, aes(x = Entry.Term, y = applicants, fill = Sex)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "U of R Student Application - No. Of Applicants for PhD by Gender and Term (2015 - 2022)",
-       x = "Term (Years)",
-       y = "Number of Applicants",
-       fill = "Gender") +
-  theme_minimal()+
+  theme_minimal() +
   theme(plot.title = element_text(size = 10))
 
 
 ```
 
+```{r phd applicants by gender, echo=FALSE}
+pByGender<- phd %>% group_by(Degree,Entry.Term,Sex) %>% 
+  summarise(applicants = n(),
+            .groups='drop')
 
+# Create a grouped bar chat for No. Of Applicants for PhD by Gender and Term
+ggplot(pByGender, aes(x = Entry.Term, y = applicants, fill = Sex)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "U of R Student Application - No. Of Applicants for PhD by Gender and Term (2015 - 2022)",
+       x = "Term (Years)",
+       y = "Number of Applicants",
+       fill = "Gender") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 10))
+```
+\hrule
 4.What are the top 10 countries from which applicants have applied to the university?
-```{r  top country of applicants, echo=FALSE}
+
+```{r  masters top country of applicants, echo=FALSE}
 
 # Master Applicants
 appCountryM <- masters %>%
@@ -142,6 +152,10 @@ geom_bar(stat = "identity", position = "stack", width = 0.9) +
         plot.title = element_text(size = 10, hjust = 0.5),  # Center the title
         legend.title = element_text(size = 10),
         legend.text = element_text(size = 8))
+```
+
+
+```{r phdtop country of applicants, echo = FALSE}
 
 #PhD Applicants
 appCountryP <- phd %>%
@@ -154,8 +168,7 @@ appCountryP <- phd %>%
 ggplot(appCountryM, beside = TRUE, aes(x = reorder(Citizenship, Count), y = Count, fill = Entry.Term)) +
   geom_bar(stat = "identity", position = "stack", width = 0.9) +
   
-  # Improve the appearance
-  theme_minimal() +
+theme_minimal() +
   labs(title = "U of R Student Application - No. Of PhD Applicants based on Citizenship By Term (2015 - 2022)", 
        x = "Citizenship Status", 
        y = "No. Of Applicants") +
@@ -166,13 +179,14 @@ ggplot(appCountryM, beside = TRUE, aes(x = reorder(Citizenship, Count), y = Coun
   theme(axis.text.y = element_text(size = 10, angle = 45),
         plot.title = element_text(size = 10, hjust = 0.5),  # Center the title
         legend.title = element_text(size = 10),
-        legend.text = element_text(size = 8))
+        legend.text = element_text(size = 7.5))
 
 
 ```
-
+\hrule
 5.Determine the total number of applicants who were placed on probation.
-```{r  applicants placed on probation, echo=FALSE}
+
+```{r  masters applicants placed on probation, echo=FALSE}
 
 #Masters students
 mProb <- subset(masters,Ever.Placed.on.Academic.Probation==1 | Ever.Placed.on.Academic.Probation==0)
@@ -189,7 +203,9 @@ ggplot(nProbM, aes(x=Entry.Term, y = applicant, color = probationStatus, group =
     labs(color = "Ever Placed on Probation",x="Term Year",y="No.Of Applicants",fill="Probation Status") +
     ggtitle("U of R Student Application - Total No.of Masters Applicants By Probation Status and Term (2015 - 2022)") +
     theme(plot.title = element_text(size = 8))
+```
 
+```{r phd applicants placed on probation, echo=FALSE}
 
 #PhD students
 pProb <- subset(phd,Ever.Placed.on.Academic.Probation==1 | Ever.Placed.on.Academic.Probation==0)
@@ -208,9 +224,10 @@ ggplot(nProbP, aes(x=Entry.Term, y = applicant, color = probationStatus, group =
     theme(plot.title = element_text(size = 8))
 ```
 
-
+\hrule
 6.Determine the total number of applicants who failed a course.
-```{r  applicants failed a course, echo=FALSE}
+
+```{r  masters applicants failed a course, echo=FALSE}
 #Masters students
 mCourse <- subset(masters,Have.you.ever.failed.a.course.==1 | Have.you.ever.failed.a.course.==0)
 mCourse$courseStatus = ifelse(mCourse$Have.you.ever.failed.a.course.==1,"failed","not failed")
@@ -227,7 +244,10 @@ ggplot(nCourseM, aes(x=Entry.Term, y = applicant, color = courseStatus, group = 
     ggtitle("U of R Student Application - Total No.of Masters Applicants By Failed A course Status and Term (2015 - 2022)") +
     theme(plot.title = element_text(size = 8))
 
+```
 
+
+```{r phd applicants failed a course, echo=FALSE}
 #PhD students
 pCourse <- subset(phd,Have.you.ever.failed.a.course.==1 | Have.you.ever.failed.a.course.==0)
 pCourse$courseStatus = ifelse(pCourse$Have.you.ever.failed.a.course.==1,"failed","not failed")
@@ -244,11 +264,12 @@ ggplot(nCourseP, aes(x=Entry.Term, y = applicant, color = courseStatus, group = 
     ggtitle("U of R Student Application - Total No.of PhD Applicants By Failed A course Status and Term (2015 - 2022)") +
     theme(plot.title = element_text(size = 8))
 ```
-
+\hrule
 ## Data Cleaning: Comment on the steps and also mention if you have modified the data set
 
 
 1.Apply a filter to the dataset based on the 24 specified dimensions.
+
 ```{r  filter dimensions, echo=FALSE}
 
 #Column to Remove
@@ -427,7 +448,7 @@ phd_data$decision_status<-ifelse(phd_data$decision=="Deny","deny",
 
 
 1.Calculate the mean, variance, and standard deviation of age, and visualize the distribution using histograms and box plots.
-```{r  descriptive analysis of age Masters - mean variance and standard deviation, echo=FALSE}
+```{r  descriptive analysis of age Masters - mean variance and standard deviation, echo=FALSE,warning=FALSE}
 
 # mean , var, sd of age in masters dataset
 mastMeanAge<- mean(masters_data$age)
@@ -436,7 +457,7 @@ mastSdAge<-sd(masters_data$age)
 
 ```
 
-```{r descriptive analysis of age Masters - histogram of age, echo=FALSE}
+```{r descriptive analysis of age Masters - histogram of age, echo=FALSE,warning=FALSE}
 bin <-ceiling((log2(length(masters_data$age))) + 1)
 
 ggplot(data = masters_data, aes(x=age)) + geom_histogram(
@@ -444,12 +465,13 @@ ggplot(data = masters_data, aes(x=age)) + geom_histogram(
   geom_vline(xintercept =  mean(masters_data$age),col = "red") + 
   geom_vline(xintercept = median(masters_data$age), col = "blue") +
   annotate("text",x = 30, y = 8000 , label = substitute(paste(tilde(x), "=",m),list(m=sprintf("%.02f",median(masters_data$age)))),color = "blue") + 
-  annotate("text",x = 30, y = 7000, label = substitute(paste(bar(x),"=",m),list(m=sprintf("%.02f", mean(masters_data$age)))),color = "red")
+  annotate("text",x = 30, y = 7000, label = substitute(paste(bar(x),"=",m),list(m=sprintf("%.02f", mean(masters_data$age)))),color = "red") + theme(plot.title = element_text(size = 10))
   
 ```
-```{r descriptive analysis of age Masters - box plot of age, echo=FALSE}
 
-ggplot(masters_data, aes(y = age,x =entry_term))+geom_boxplot(outlier.size = 1.5 )+labs(title = "U of R Student Application - Box Plot of Master's Applicant Age By Term (2015 - 2022)", x = "Term By Year", y = "Age")+theme(plot.title = element_text(size = 12))
+```{r descriptive analysis of age Masters - box plot of age, echo=FALSE,warning=FALSE}
+
+ggplot(masters_data, aes(y = age,x =entry_term))+geom_boxplot(outlier.size = 1.5 )+labs(title = "U of R Student Application - Box Plot of Master's Applicant Age By Term (2015 - 2022)", x = "Term By Year", y = "Age")+theme(plot.title = element_text(size = 10))
 ```
 ```{r  descriptive analysis of age PhDs - mean variance and standard deviation, echo=FALSE}
 
@@ -460,7 +482,7 @@ phdSdAge<-sd(phd_data$age)
 
 ```
 
-```{r descriptive analysis of age PhDs - histogram of age, echo=FALSE}
+```{r descriptive analysis of age PhDs - histogram of age, echo=FALSE,warning=FALSE}
 bin <-ceiling((log2(length(phd_data$age))) + 1)
 
 ggplot(data = phd_data, aes(x=age)) + geom_histogram(
@@ -468,16 +490,18 @@ ggplot(data = phd_data, aes(x=age)) + geom_histogram(
   geom_vline(xintercept =  mean(phd_data$age),col = "red") + 
   geom_vline(xintercept = median(phd_data$age), col = "blue") +
   annotate("text",x = 30, y = 8000 , label = substitute(paste(tilde(x), "=",m),list(m=sprintf("%.02f",median(phd_data$age)))),color = "blue") + 
-  annotate("text",x = 30, y = 7000, label = substitute(paste(bar(x),"=",m),list(m=sprintf("%.02f", mean(phd_data$age)))),color = "red")
+  annotate("text",x = 30, y = 7000, label = substitute(paste(bar(x),"=",m),list(m=sprintf("%.02f", mean(phd_data$age)))),color = "red") + theme(plot.title = element_text(size = 10))
   
 ```
-```{r descriptive analysis of age PhDs - box plot of age, echo=FALSE}
 
-ggplot(phd_data, aes(y = age,x=entry_term))+geom_boxplot(outlier.size = 1.5 )+labs(title = "U of R Student Application - Box Plot of PhD's Applicant Age By Term (2015 -2022)", x = "Term By Year", y = "Age")+theme(plot.title = element_text(size = 12))
+```{r descriptive analysis of age PhDs - box plot of age, echo=FALSE,warning=FALSE}
+
+ggplot(phd_data, aes(y = age,x=entry_term))+geom_boxplot(outlier.size = 1.5 )+labs(title = "U of R Student Application - Box Plot of PhD's Applicant Age By Term (2015 -2022)", x = "Term By Year", y = "Age")+theme(plot.title = element_text(size = 10))
 ```
 
 2.Examine the acceptance rate based on gender across different terms.
-```{r  acceptance rate by gender, echo=FALSE}
+
+```{r  master acceptance rate by gender, echo=FALSE,warning=FALSE}
 #masters data
 m_contingency_table <- table(masters_data$sex, masters_data$entry_term, masters_data$decision_status)
 m_proportions_by_gender <- prop.table(m_contingency_table, margin = 1)
@@ -487,11 +511,13 @@ m_merged_proportions <- m_proportions_df %>%
   filter(Var3 == "accept", Var1 %in% c("M", "F")) %>%
   arrange(Var1)
 
-print(m_merged_proportions)
-
 ggplot(m_merged_proportions, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=10))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=8))
 
+#print(m_merged_proportions)
+```
+
+```{r phd acceptance rate by gender, echo=FALSE,warning=FALSE }
 #Phd data
 p_contingency_table <- table(phd_data$sex, phd_data$entry_term, phd_data$decision_status)
 p_proportions_by_gender <- prop.table(p_contingency_table, margin = 1)
@@ -500,16 +526,17 @@ p_merged_proportions <- p_proportions_df %>%
   filter(Var3 == "accept", Var1 %in% c("M", "F")) %>%
   arrange(Var1)
 
-print(p_merged_proportions)
+#print(p_merged_proportions)
 
 ggplot(p_merged_proportions, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=10))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Gender Across Terms (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=8))
 
 ```
 
 
 3.Explore the acceptance rate by country in relation to different terms.
-```{r  acceptance rate by country, echo=FALSE}
+
+```{r  acceptance rate by country, echo=FALSE,warning=FALSE}
 
 #masters data
 m_citizen_contingency_table <- table(masters_data$citizenship_status, masters_data$entry_term, masters_data$decision_status)
@@ -520,7 +547,7 @@ m_merged_citizen <- m_citizen_proportions_df %>%
   filter(Var3 == "accept", Var1 %in% c("FN", "US", "PR", "unknown")) %>%
   arrange(Var1)
 
-print(m_merged_citizen)
+#print(m_merged_citizen)
 
 ggplot(m_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
   geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship status Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
@@ -535,35 +562,64 @@ p_merged_citizen <- p_citizen_proportions_df %>%
   filter(Var1 %in% c("FN", "US", "PR", "unknown")) %>%
   arrange(Var1)
 
-print(p_merged_citizen)
+#print(p_merged_citizen)
 
 ggplot(p_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
   geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
 
 ```
   
-4.Investigate the acceptance rate for applicants who were placed on probation.
-```{r  acceptance rate of probation applicants, echo=FALSE}
-m_probation<-subset(masters_data,decision_status=="accept" & academic_probation=="1")
-m_pro<- m_probation %>%group_by(citizenship_status) %>% summarise(applicant=n())
+4.Investigate the acceptance decision for applicants who were placed on probation.
 
-ggplot(m_pro, aes(x = "", y = applicant, fill = citizenship_status)) +
-  geom_bar(stat = "identity", width = 1, color = "white") +
-  coord_polar("y") +
-  theme_void() +  # Removes unnecessary elements
-  scale_fill_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3"))
+```{r  masters acceptance rate of probation applicants, echo=FALSE,warning=FALSE}
+
+mProbAccept<- masters_data %>% filter(academic_probation==1)
+
+mProAccG<- mProbAccept %>% group_by(decision_status,entry_term) %>% summarise(count=n(), .groups = 'drop')
+
+ggplot(mProAccG, aes(x=entry_term , y=count,fill=decision_status)) +
+  geom_col() +
+labs(title = "U of R Student Application - Acceptance Decision of Master's Applicants On Academic Probation (2015 -2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
 
 ```
 
+```{r  phd acceptance rate of probation applicants, echo=FALSE,warning=FALSE}
+pProbAccept<- phd_data %>% filter(academic_probation==1)
 
-5.Investigate the acceptance rate for applicants who failed a course.
-```{r  acceptance rate applicants who failed a course, echo=FALSE}
+pProAccG<- pProbAccept %>% group_by(decision_status,entry_term) %>% summarise(count=n(), .groups = 'drop')
 
+ggplot(pProAccG, aes(x=entry_term , y=count,fill=decision_status)) +
+  geom_col() +
+labs(title = "U of R Student Application - Acceptance Decision of PhD's Applicants On Academic Probation (2015 -2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
+```
+
+
+5.Investigate the acceptance decision for applicants who failed a course.
+
+```{r  masters acceptance rate applicants who failed a course, echo=FALSE,warning=FALSE}
+mFailedc<- masters_data %>% filter(failed_course==1)
+
+mFailedcTable <- mFailedc %>% group_by(decision_status,entry_term) %>% summarise(applicants=n(), .groups='drop') 
+
+ggplot(mFailedcTable, aes(x=entry_term , y=applicants, fill=decision_status)) +
+  geom_col() +
+  labs(title = "U of R Student Application - Acceptance Decision of Master's Applicants who failed a course (2015 -2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
+
+```
+
+```{r  phd acceptance rate applicants who failed a course, echo=FALSE,warning=FALSE}
+pFailedc<- phd_data %>% filter(failed_course==1)
+
+pFailedcTable <- pFailedc %>% group_by(decision_status,entry_term) %>% summarise(applicants=n(), .groups='drop') 
+
+ggplot(pFailedcTable, aes(x=entry_term , y=applicants, fill=decision_status)) +
+  geom_col() +
+  labs(title = "U of R Student Application - Acceptance Decision of Master's Applicants who failed a course (2015 -2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
 ```
 
 
 6.Investigate the age distribution between applicants who failed a course v/s applicants who did not fail a course.
-```{r  age distribution failed vs not failed a course, echo=FALSE} 
+```{r  age distribution failed vs not failed a course, echo=FALSE,warning=FALSE} 
 # Function to see distributions
 create_filtered_histogram <- function(data, plot_column, filter_column, filter_value, binwidth = 0.5, fill_color = "pink", text) {
   # Filter the data based on the filter_column and filter_value
@@ -607,7 +663,8 @@ H_A&:\text{There is a significant difference in the variance of ages between Mas
 &\text{who have experienced course failure and those who haven't.}
 \end{aligned}
 $$
-```{r  age variance hypothesis test, echo=FALSE}
+
+```{r  age variance hypothesis test, echo=FALSE,warning=FALSE}
 # For Master's applicants 
 masters_failed <- masters_data$age[masters_data$failed_course == 1] 
 masters_not_failed <- masters_data$age[masters_data$failed_course == 0] 
@@ -628,7 +685,6 @@ var.test(phd_failed, phd_not_failed)
 
 $$
 \begin{aligned}
-Conclusion&:\text{Insert your conclusion here}
 \end{aligned}
 $$
 
@@ -639,25 +695,28 @@ H_0&:\text{The average age of Master's students is equal to the average age of P
 H_A&:\text{The average age of Master's students is not equal to the average age of Ph.D. students.}\\
 \end{aligned}
 $$
-```{r  age variance hypothesis test by program, echo=FALSE}
+
+```{r  age variance hypothesis test by program, echo=FALSE,warning=FALSE}
 # T-test to compare average age 
 t.test(masters_data$age, phd_data$age)
 ```
 
 $$
 \begin{aligned}
-Conclusion&:\text{Insert your conclusion here}
+Conclusion&:\text{The extremely small p-value 
+(p < 2.2e-16) is much lower than our alpha level of significance } (\alpha = 0.05), \text{indicating that the} \\ &\text{ difference in average ages between Master's and Ph.D. students is statistically significant.} \\ &\text{Therefore, we reject the null hypothesis, H0, which stated that we don’t have enough evidence to conclude that the average of} \\ &\text{Master’s students is equal to the average of PhD students.}
 \end{aligned}
 $$
 
 3. Compare the acceptance rate for students who learned about the university through family/friends versus those who found it through an internet search.
 $$
 \begin{aligned}
-H_0&:\text{Applicants who leart about U of R through Family/Friend or}\\&\text{Internet Search is independent of Acceptance status }\\
-H_A&:\text{Applicants who leart about U of R through Family/Friend or}\\&\text{ Internet Search and Acceptance status are associated }\\
+H_0&:\text{Applicants who learnt about U of R through Family/Friend or}\\&\text{Internet Search is independent of Acceptance status }\\
+H_A&:\text{Applicants who learnt about U of R through Family/Friend or}\\&\text{ Internet Search and Acceptance status are associated }\\
 \end{aligned}
 $$
-```{r  hypothesis test based on how they hear about U of R, echo=FALSE}
+
+```{r  hypothesis test based on how they hear about U of R, echo=FALSE,warning=FALSE}
 #masters data
 family_friend<- subset(masters_data, heard_about_UR=="Family/Friend")
 n_accept_frnd_fam<-length(family_friend$heard_about_UR[family_friend$decision_status=="accept"])
@@ -698,68 +757,70 @@ print(result)
 ```
 $$
 \begin{aligned}
-Conclusion&:\text{Insert your conclusion here}
+Master\;Conclusion&:\text{Since the p-value is less than significance level , we reject the null hypothesis}\\ &\text{and  suggest that there is an association between how student learnt about university} \\ &\text{and acceptance rate for Master’s Program.}\\
+\\
+PhD\;Conclusion&:\text{Since the p-value is greater than significance level , we  accept the null hypothesis}\\ &\text{and conclude that  there is no association between how student learnt about university}\\ &\text{and acceptance rate for PhD program.}
 \end{aligned}
 $$
 
 ## Logistic Regression:
 
 1. Can we use factors such as age, citizenship, gender, recommender relationships, current employment status, and program choice to predict the likelihood of a candidate being accepted?
-```{r merge data, echo=FALSE}
-rows_to_keep_masters <- nrow(masters_data) 
-rows_to_keep_phd <- nrow(phd_data)
- 
- 
-# Randomly sample rows from df1
-reduced_masters <- sample_n(masters_data, size = rows_to_keep_masters)
-reduced_phd <- sample_n(phd_data, size = rows_to_keep_phd )
- 
-# Merge the reduced df1 with df2
-merged_data_masters_phd <- rbind(reduced_masters, reduced_phd)
+```{r merge data, echo=FALSE,warning=FALSE}
+# rows_to_keep_masters <- nrow(masters_data) 
+# rows_to_keep_phd <- nrow(phd_data)
+#  
+#  
+# # Randomly sample rows from df1
+# reduced_masters <- sample_n(masters_data, size = rows_to_keep_masters)
+# reduced_phd <- sample_n(phd_data, size = rows_to_keep_phd )
+#  
+# # Merge the reduced df1 with df2
+# merged_data_masters_phd <- rbind(reduced_masters, reduced_phd)
 ```
 
 ```{r  logistic regression - preparing data, echo=FALSE}
 
-merged_data_masters_phd <- na.omit(merged_data_masters_phd)
-categorical_vars <- c("program", "degree", "entry_term", "time_status", 
-                      "sex","citizenship_status","failed_course",
-                      "academic_probation",
-                      "inst_1_degree","heard_about_UR")                                                  
-#print(categorical_vars)
-categorical_vars <- categorical_vars[categorical_vars %in% colnames(merged_data_masters_phd)]
-print(categorical_vars)
-merged_data_masters_phd[categorical_vars] <- lapply(merged_data_masters_phd[categorical_vars], factor)
+# merged_data_masters_phd <- na.omit(merged_data_masters_phd)
+# categorical_vars <- c("program", "degree", "entry_term", "time_status", 
+#                       "sex","citizenship_status","failed_course",
+#                       "academic_probation",
+#                       "inst_1_degree","heard_about_UR")                                                  
+# #print(categorical_vars)
+# categorical_vars <- categorical_vars[categorical_vars %in% colnames(merged_data_masters_phd)]
+# print(categorical_vars)
+# merged_data_masters_phd[categorical_vars] <- lapply(merged_data_masters_phd[categorical_vars], factor)
 ```
 
 ```{r logistic regression - model building, echo=FALSE}
-modelTrainingfeatures  <- select(merged_data_masters_phd, program, degree, entry_term, time_status, 
-               sex, citizenship_status, inst_1_degree, heard_about_UR, 
-               age, failed_course, academic_probation, decision_status)
- 
-modelTrainingfeatures$decision_status <- ifelse(merged_data_masters_phd$decision_status == "accept", 1, 0)
- 
-#Splitting the dataset into 70% Training and 30% Testing
-#Splitting the dataset into 70% Training and 30% Testing
-set.seed(123) # for reproducible results
-split <- sample.split(modelTrainingfeatures$decision_status, SplitRatio = 0.7)
-train <- subset(modelTrainingfeatures, split == TRUE)
-test <- subset(modelTrainingfeatures, split == FALSE)
+# modelTrainingfeatures  <- select(merged_data_masters_phd, program, degree, entry_term, time_status, 
+#                sex, citizenship_status, inst_1_degree, heard_about_UR, 
+#                age, failed_course, academic_probation, decision_status)
+#  
+# modelTrainingfeatures$decision_status <- ifelse(merged_data_masters_phd$decision_status == "accept", 1, 0)
+#  
+# #Splitting the dataset into 70% Training and 30% Testing
+# #Splitting the dataset into 70% Training and 30% Testing
+# set.seed(123) # for reproducible results
+# split <- sample.split(modelTrainingfeatures$decision_status, SplitRatio = 0.7)
+# train <- subset(modelTrainingfeatures, split == TRUE)
+# test <- subset(modelTrainingfeatures, split == FALSE)
 
 ```
 
 ```{r logistic regression - prediction and accuracy, echo=FALSE}
-model <- glm(decision_status ~ ., data = train, family = "binomial")
-print(summary(model))
- 
- 
-predictions <- predict(model, newdata = test, type = "response")
-predicted_classes <- ifelse(predictions > 0.50, 1, 0)
-# Confusion matrix for the test set
-conf_matrix <- table(Predicted = predicted_classes, Actual = test$decision_status)
-print(conf_matrix)
-# Calculate accuracy on the test set
-accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-print(paste("Accuracy:", accuracy))
+# model <- glm(decision_status ~ ., data = train, family = "binomial")
+# print(summary(model))
+#  
+#  
+# predictions <- predict(model, newdata = test, type = "response")
+# predicted_classes <- ifelse(predictions > 0.50, 1, 0)
+# # Confusion matrix for the test set
+# conf_matrix <- table(Predicted = predicted_classes, Actual = test$decision_status)
+# print(conf_matrix)
+# # Calculate accuracy on the test set
+# accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+# print(paste("Accuracy:", accuracy))
 
 ```
 
