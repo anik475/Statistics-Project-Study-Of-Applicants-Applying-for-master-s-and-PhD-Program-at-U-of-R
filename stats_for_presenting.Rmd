@@ -24,10 +24,12 @@ library(tidyr)
 
 ```
 
-## Visualization of the data before beginning any analysis (will include unknown data) - Masters v/s PhD:
+## Visualizations of EDA (will include unknown data) - Masters v/s PhD:
+
 
 
 1.What is the annual total no. of applicants, which term recorded the highest and lowest number of applicants?
+
 ```{r no.Of applicants, echo=FALSE}
 
 noOfApp <- applicantData %>% 
@@ -46,25 +48,29 @@ ggplot(data = noOfApp, aes(x = Entry.Term, y = no_of_application, group = Degree
 
 ```
 ```{r applicants by sub-program, echo=FALSE}
+
 masters<-subset(applicantData,Degree=="Master's")
-phd<-subset(applicantData,Degree=="PhD")
 
 noOfAppM <- masters %>% 
   group_by(Entry.Term, Program..ASE.) %>% 
   summarise(no_of_application = n(), .groups = 'drop')
 
-# Plotting
-ggplot(data = noOfAppM, aes(x = Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) + 
+
+ggplot(data = noOfAppM, aes(x = Entry.Term, y = no_of_application, group = Program..ASE., color = Program..ASE.)) +
   geom_line() +
   geom_point() +
-  xlab("Term") + ylab("Number of Applicants") + 
+  xlab("Term") + ylab("Number of Applicants") +
   labs(color = "Program") +
   ggtitle("U of R Student Application - Number of Master's Sub-Program Applicants by Program (2015 - 2022)") +
-  theme(plot.title = element_text(size = 8, hjust = 0.5)) 
+  theme(plot.title = element_text(size = 8, hjust = 0.5))
+
   
 ```
 
 ```{r no.Of Applicants by Phd program, echo=FALSE}
+
+phd<-subset(applicantData,Degree=="PhD")
+
 #no.Of Applicants by Phd program
 noOfAppP<-phd %>% group_by(Entry.Term,Program..ASE.) %>% 
   summarise(no_of_application = n(),
@@ -75,14 +81,45 @@ ggplot(data=noOfAppP, aes(x=Entry.Term, y = no_of_application, group = Program..
   geom_line() +
   geom_point()+
   xlab("Term Year") + ylab("No.Of Applicants") + 
-  labs(color = "Program") +
-  ggtitle("U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)") +
+  labs(title = "U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)",color = "Program") +
   theme(plot.title = element_text(size = 8, hjust = 0.5))
 ```
-\hrule
-2.Identify the top 10 undergraduate institutes from which applicants are applying.
-```{r top 10 undergrad institutes, echo=FALSE}
 
+2.Identify the top 10 undergraduate institutes from which applicants are applying.
+
+```{r masters top 10 undergrad institutes, echo=FALSE}
+
+mTopIns <- masters %>% group_by(Institution.1.Name) %>% summarize(applicants=n(), 
+            .groups = 'drop') %>% 
+            arrange(desc(applicants)) %>%
+            slice_head(n = 10)
+
+ggplot(mTopIns, aes(x = reorder(Institution.1.Name, -applicants), y = applicants)) +
+  geom_col(fill = "steelblue") +
+  labs(title = "U of R Student Application - Top 10 Institution of Master Applicants (2015 - 2022)",
+       x = "Institution",
+       y = "Number of Applicants") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10))
+
+```
+
+
+```{r phd top 10 undergrad institutes, echo=FALSE}
+pTopIns <- phd %>% group_by(Institution.1.Name) %>% summarize(applicants=n(), 
+            .groups = 'drop') %>% 
+            arrange(desc(applicants)) %>%
+            slice_head(n = 10)
+
+ggplot(pTopIns, aes(x = reorder(Institution.1.Name, -applicants), y = applicants)) +
+  geom_col(fill = "skyblue") +
+  labs(title = "U of R Student Application - Top 10 Institution of PhD Applicants (2015 - 2022)",
+       x = "Institution",
+       y = "Number of Applicants") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1),
+        plot.title = element_text(size = 10))
 ```
 
 
@@ -122,8 +159,9 @@ ggplot(pByGender, aes(x = Entry.Term, y = applicants, fill = Sex)) +
        fill = "Gender") +
   theme_minimal() +
   theme(plot.title = element_text(size = 10))
+
 ```
-\hrule
+
 4.What are the top 10 countries from which applicants have applied to the university?
 
 ```{r  masters top country of applicants, echo=FALSE}
@@ -183,7 +221,8 @@ theme_minimal() +
 
 
 ```
-\hrule
+
+
 5.Determine the total number of applicants who were placed on probation.
 
 ```{r  masters applicants placed on probation, echo=FALSE}
@@ -224,7 +263,7 @@ ggplot(nProbP, aes(x=Entry.Term, y = applicant, color = probationStatus, group =
     theme(plot.title = element_text(size = 8))
 ```
 
-\hrule
+
 6.Determine the total number of applicants who failed a course.
 
 ```{r  masters applicants failed a course, echo=FALSE}
@@ -264,7 +303,7 @@ ggplot(nCourseP, aes(x=Entry.Term, y = applicant, color = courseStatus, group = 
     ggtitle("U of R Student Application - Total No.of PhD Applicants By Failed A course Status and Term (2015 - 2022)") +
     theme(plot.title = element_text(size = 8))
 ```
-\hrule
+
 ## Data Cleaning: Comment on the steps and also mention if you have modified the data set
 
 
@@ -550,7 +589,7 @@ m_merged_citizen <- m_citizen_proportions_df %>%
 #print(m_merged_citizen)
 
 ggplot(m_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship status Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
 
 
 #Phd data
@@ -565,7 +604,7 @@ p_merged_citizen <- p_citizen_proportions_df %>%
 #print(p_merged_citizen)
 
 ggplot(p_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship Across Different Terms (2015 -2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
 
 ```
   
@@ -603,7 +642,7 @@ mFailedcTable <- mFailedc %>% group_by(decision_status,entry_term) %>% summarise
 
 ggplot(mFailedcTable, aes(x=entry_term , y=applicants, fill=decision_status)) +
   geom_col() +
-  labs(title = "U of R Student Application - Acceptance Decision of Master's Applicants who failed a course (2015 -2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
+  labs(title = "U of R Student Application - Acceptance Decision of Master's Applicants who failed a course (2015 - 2022)", x = "Term Year", y = "No. Of Applicants", fill="Decision Status") + theme(plot.title = element_text(size=8))
 
 ```
 
@@ -633,19 +672,19 @@ create_filtered_histogram <- function(data, plot_column, filter_column, filter_v
          x = plot_column, 
          y = "Frequency") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-    theme(plot.title = element_text(size = 10))
+    theme(plot.title = element_text(size = 8))
 }
 
 
 # To help respond 3rd sub question of th primary question
-create_filtered_histogram(masters_data, "age", "failed_course", 0, 0.5, "green","U of R Student Application - Master's Applicants Never Failed a Course")
-create_filtered_histogram(masters_data, "age", "failed_course", 1, 0.5, "yellow","U of R Student Application - Master's Applicants Failed a Course ")
+create_filtered_histogram(masters_data, "age", "failed_course", 0, 0.5, "green","U of R Student Application - Distribution of age of Master's Applicants Never Failed a Course (2015 - 2022)")
+create_filtered_histogram(masters_data, "age", "failed_course", 1, 0.5, "yellow","U of R Student Application - Distribution of age of Master's Applicants Failed a Course (2015 - 2022)")
 
 
 ggplot(applicantData, aes(x = degree, y = age)) +
   geom_boxplot() +
   theme_minimal() +
-  labs(title = "Age Distribution by Degree", 
+  labs(title = "U of R Student Application - Age Distribution by Degree (2015 - 2022)", 
        x = "Degree", 
        y = "Age at Application Submission") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
