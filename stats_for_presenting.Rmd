@@ -1,7 +1,7 @@
 ---
 title: "Study Of Applicants Applying for Masters and PhD programs at UofR"
 author: "Anik De, Babli Dey, Sharon Gilbert, Veronica Mata"
-date: "2023-12-09"
+date: "2023-12-14"
 output: pdf_document
 ---
 
@@ -62,7 +62,7 @@ ggplot(data = noOfAppM, aes(x = Entry.Term, y = no_of_application, group = Progr
   xlab("Term") + ylab("Number of Applicants") +
   labs(color = "Program") +
   ggtitle("U of R Student Application - Number of Master's Sub-Program Applicants by Program (2015 - 2022)") +
-  theme(plot.title = element_text(size = 8, hjust = 0.5))
+  theme(plot.title = element_text(size = 8, hjust = 0.5), axis.text.x = element_text(angle = 30, hjust = 1))
 
   
 ```
@@ -82,7 +82,7 @@ ggplot(data=noOfAppP, aes(x=Entry.Term, y = no_of_application, group = Program..
   geom_point()+
   xlab("Term Year") + ylab("No.Of Applicants") + 
   labs(title = "U of R Student Application - Total No.of PhD Sub Program Applicants Every Fall Term By Program (2015 - 2022)",color = "Program") +
-  theme(plot.title = element_text(size = 8, hjust = 0.5))
+  theme(plot.title = element_text(size = 8, hjust = 0.5), axis.text.x = element_text(angle = 30, hjust = 1))
 ```
 
 2.Identify the top 10 undergraduate institutes from which applicants are applying.
@@ -241,7 +241,7 @@ ggplot(nProbM, aes(x=Entry.Term, y = applicant, color = probationStatus, group =
     geom_point()+
     labs(color = "Ever Placed on Probation",x="Term Year",y="No.Of Applicants",fill="Probation Status") +
     ggtitle("U of R Student Application - Total No.of Masters Applicants By Probation Status and Term (2015 - 2022)") +
-    theme(plot.title = element_text(size = 8))
+    theme(plot.title = element_text(size = 8), axis.text.x = element_text(angle = 30, hjust = 1))
 ```
 
 ```{r phd applicants placed on probation, echo=FALSE}
@@ -260,7 +260,7 @@ ggplot(nProbP, aes(x=Entry.Term, y = applicant, color = probationStatus, group =
     geom_point()+
     labs(color = "Ever Placed on Probation",x="Term Year",y="No.Of Applicants",fill="Probation Status") +
     ggtitle("U of R Student Application - Total No.of PhD Applicants By Probation Status and Term (2015 - 2022)") +
-    theme(plot.title = element_text(size = 8))
+    theme(plot.title = element_text(size = 8), axis.text.x = element_text(angle = 30, hjust = 1))
 ```
 
 
@@ -304,7 +304,7 @@ ggplot(nCourseP, aes(x=Entry.Term, y = applicant, color = courseStatus, group = 
     theme(plot.title = element_text(size = 8))
 ```
 
-## Data Cleaning: Comment on the steps and also mention if you have modified the data set
+## Data Cleaning: (code in rmd file)
 
 
 1.Apply a filter to the dataset based on the 24 specified dimensions.
@@ -494,6 +494,9 @@ mastMeanAge<- mean(masters_data$age)
 mastVarAge<- var(masters_data$age)
 mastSdAge<-sd(masters_data$age)
 
+cat("The Mean age of Masters applicant is:", mastMeanAge)
+cat("\nThe Variance in age of Masters applicant is:", mastVarAge)
+cat("\nThe Standard Deviation in age of Masters applicant is:",mastSdAge)
 ```
 
 ```{r descriptive analysis of age Masters - histogram of age, echo=FALSE,warning=FALSE}
@@ -518,6 +521,10 @@ ggplot(masters_data, aes(y = age,x =entry_term))+geom_boxplot(outlier.size = 1.5
 phdMeanAge<- mean(phd_data$age)
 phdVarAge<- var(phd_data$age)
 phdSdAge<-sd(phd_data$age)
+
+cat("The Mean age of PhD applicant is:", phdMeanAge)
+cat("\nThe Variance in age of PhD applicant is:",phdVarAge)
+cat("\nThe Standard Deviation in age of PhD applicant is:",phdSdAge)
 
 ```
 
@@ -690,6 +697,8 @@ ggplot(applicantData, aes(x = degree, y = age)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ```
+_______________________________________
+
 
 ## Inferential Analysis:
 
@@ -722,12 +731,23 @@ var.test(phd_failed, phd_not_failed)
 
 ```
 
-$$
-\begin{aligned}
-\end{aligned}
-$$
+\begin{equation}
+\begin{split}
+\text{Conclusion}: &\text{ Given that the p-value is much less than the significance level } \\
+&(\alpha = 0.05), \text{ we reject the null hypothesis. This suggests that} \\
+&\text{there is a statistically significant difference in the variance of the} \\
+&\text{ages between Master’s applicants who have experienced course} \\
+&\text{failure and those who haven’t.}
+\end{split}
+\end{equation}
+
+_______________________________________
+
+
 
 2. Is there a discernible difference in the average age between master's and Ph.D. students?
+
+
 $$
 \begin{aligned}
 H_0&:\text{The average age of Master's students is equal to the average age of Ph.D. students. (no difference in means)}\\
@@ -736,16 +756,25 @@ H_A&:\text{The average age of Master's students is not equal to the average age 
 $$
 
 ```{r  age variance hypothesis test by program, echo=FALSE,warning=FALSE}
+
 # T-test to compare average age 
 t.test(masters_data$age, phd_data$age)
 ```
 
-$$
-\begin{aligned}
-Conclusion&:\text{The extremely small p-value 
-(p < 2.2e-16) is much lower than our alpha level of significance } (\alpha = 0.05), \text{indicating that the} \\ &\text{ difference in average ages between Master's and Ph.D. students is statistically significant.} \\ &\text{Therefore, we reject the null hypothesis, H0, which stated that we don’t have enough evidence to conclude that the average of} \\ &\text{Master’s students is equal to the average of PhD students.}
-\end{aligned}
-$$
+\begin{equation}
+\begin{split}
+Conclusion&: \text{The extremely small p-value (p < 2.2e-16) is much lower than our alpha level of significance } \\
+&(\alpha = 0.05) \text{indicating that the difference in average ages between Master's and Ph.D. students} \\
+&\text{is statistically significant. Therefore, we reject the null hypothesis, H0, which stated that we don’t} \\
+&\text{have enough evidence to conclude that the average of Master’s students is equal} \\
+&\text{ to the average of PhD students.}
+\end{split}
+\end{equation}
+
+
+_______________________________________
+
+
 
 3. Compare the acceptance rate for students who learned about the university through family/friends versus those who found it through an internet search.
 $$
@@ -794,72 +823,81 @@ print(result)
 
 
 ```
-$$
+
+\begin{equation}
 \begin{aligned}
-Master\;Conclusion&:\text{Since the p-value is less than significance level , we reject the null hypothesis}\\ &\text{and  suggest that there is an association between how student learnt about university} \\ &\text{and acceptance rate for Master’s Program.}\\
+&\alpha = 0.05 \\
+\text{Master Conclusion}: &\text{ Since the p-value is less than the significance level, we reject the null hypothesis} \\
+&\text{and suggest that there is an association between how students learned about the university} \\
+&\text{and the acceptance rate for the Master’s Program.} \\
 \\
-PhD\;Conclusion&:\text{Since the p-value is greater than significance level , we  accept the null hypothesis}\\ &\text{and conclude that  there is no association between how student learnt about university}\\ &\text{and acceptance rate for PhD program.}
+\text{PhD Conclusion}: &\text{ Since the p-value is greater than the significance level, we accept the null hypothesis} \\
+&\text{and conclude that there is no association between how students learned about the university} \\
+&\text{and the acceptance rate for the PhD program.}
 \end{aligned}
-$$
+\end{equation}
+
+_______________________________________
+
 
 ## Logistic Regression:
 
 1. Can we use factors such as age, citizenship, gender, recommender relationships, current employment status, and program choice to predict the likelihood of a candidate being accepted?
 ```{r merge data, echo=FALSE,warning=FALSE}
-# rows_to_keep_masters <- nrow(masters_data) 
-# rows_to_keep_phd <- nrow(phd_data)
-#  
-#  
-# # Randomly sample rows from df1
-# reduced_masters <- sample_n(masters_data, size = rows_to_keep_masters)
-# reduced_phd <- sample_n(phd_data, size = rows_to_keep_phd )
-#  
-# # Merge the reduced df1 with df2
-# merged_data_masters_phd <- rbind(reduced_masters, reduced_phd)
+rows_to_keep_masters <- nrow(masters_data)
+rows_to_keep_phd <- nrow(phd_data)
+
+
+# Randomly sample rows from df1
+reduced_masters <- sample_n(masters_data, size = rows_to_keep_masters)
+reduced_phd <- sample_n(phd_data, size = rows_to_keep_phd )
+
+# Merge the reduced df1 with df2
+merged_data_masters_phd <- rbind(reduced_masters, reduced_phd)
 ```
 
 ```{r  logistic regression - preparing data, echo=FALSE}
 
-# merged_data_masters_phd <- na.omit(merged_data_masters_phd)
-# categorical_vars <- c("program", "degree", "entry_term", "time_status", 
-#                       "sex","citizenship_status","failed_course",
-#                       "academic_probation",
-#                       "inst_1_degree","heard_about_UR")                                                  
-# #print(categorical_vars)
-# categorical_vars <- categorical_vars[categorical_vars %in% colnames(merged_data_masters_phd)]
-# print(categorical_vars)
-# merged_data_masters_phd[categorical_vars] <- lapply(merged_data_masters_phd[categorical_vars], factor)
+merged_data_masters_phd <- na.omit(merged_data_masters_phd)
+categorical_vars <- c("program", "degree", "entry_term", "time_status",
+                      "sex","citizenship_status","failed_course",
+                      "academic_probation",
+                      "inst_1_degree","heard_about_UR")
+#print(categorical_vars)
+categorical_vars <- categorical_vars[categorical_vars %in% colnames(merged_data_masters_phd)]
+print(categorical_vars)
+merged_data_masters_phd[categorical_vars] <- lapply(merged_data_masters_phd[categorical_vars], factor)
 ```
 
 ```{r logistic regression - model building, echo=FALSE}
-# modelTrainingfeatures  <- select(merged_data_masters_phd, program, degree, entry_term, time_status, 
-#                sex, citizenship_status, inst_1_degree, heard_about_UR, 
-#                age, failed_course, academic_probation, decision_status)
-#  
-# modelTrainingfeatures$decision_status <- ifelse(merged_data_masters_phd$decision_status == "accept", 1, 0)
-#  
-# #Splitting the dataset into 70% Training and 30% Testing
-# #Splitting the dataset into 70% Training and 30% Testing
-# set.seed(123) # for reproducible results
-# split <- sample.split(modelTrainingfeatures$decision_status, SplitRatio = 0.7)
-# train <- subset(modelTrainingfeatures, split == TRUE)
-# test <- subset(modelTrainingfeatures, split == FALSE)
+modelTrainingfeatures  <- select(merged_data_masters_phd, program, degree, entry_term, time_status,
+               sex, citizenship_status, inst_1_degree, heard_about_UR,
+               age, failed_course, academic_probation, decision_status)
+
+modelTrainingfeatures$decision_status <- ifelse(merged_data_masters_phd$decision_status == "accept", 1, 0)
+
+
+#Splitting the dataset into 70% Training and 30% Testing
+set.seed(123) # for reproducible results
+split <- sample.split(modelTrainingfeatures$decision_status, SplitRatio = 0.7)
+train <- subset(modelTrainingfeatures, split == TRUE)
+test <- subset(modelTrainingfeatures, split == FALSE)
 
 ```
 
 ```{r logistic regression - prediction and accuracy, echo=FALSE}
-# model <- glm(decision_status ~ ., data = train, family = "binomial")
-# print(summary(model))
-#  
-#  
-# predictions <- predict(model, newdata = test, type = "response")
-# predicted_classes <- ifelse(predictions > 0.50, 1, 0)
-# # Confusion matrix for the test set
-# conf_matrix <- table(Predicted = predicted_classes, Actual = test$decision_status)
-# print(conf_matrix)
-# # Calculate accuracy on the test set
-# accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
-# print(paste("Accuracy:", accuracy))
+ model <- glm(decision_status ~ ., data = train, family = "binomial")
+ print(summary(model))
+  
+  
+ predictions <- predict(model, newdata = test, type = "response")
+ predicted_classes <- ifelse(predictions > 0.50, 1, 0)
+ # Confusion matrix for the test set
+ conf_matrix <- table(Predicted = predicted_classes, Actual = test$decision_status)
+ print(conf_matrix)
+ # Calculate accuracy on the test set
+ accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+ print(paste("Accuracy:", accuracy))
 
 ```
 
