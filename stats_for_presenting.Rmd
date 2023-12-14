@@ -596,7 +596,7 @@ m_merged_citizen <- m_citizen_proportions_df %>%
 #print(m_merged_citizen)
 
 ggplot(m_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - Master's Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Citizenship Status") + theme(plot.title = element_text(size=9))
 
 
 #Phd data
@@ -611,7 +611,7 @@ p_merged_citizen <- p_citizen_proportions_df %>%
 #print(p_merged_citizen)
 
 ggplot(p_merged_citizen, aes(x = Var2, y = Freq , fill=Var1)) +
-  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Gender") + theme(plot.title = element_text(size=9))
+  geom_col(position = "fill")+ labs(title="U of R Student Application - PhD Acceptance Rate Based On Citizenship (2015 - 2022)", x = "Term Year", y = "Proportion", fill="Citizenship Status") + theme(plot.title = element_text(size=9))
 
 ```
   
